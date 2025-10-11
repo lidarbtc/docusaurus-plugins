@@ -16,6 +16,13 @@ const config: Config = {
     experimental_router: 'browser',
   },
 
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownImages: 'throw'
+    }
+  },
+
   // Set the production url of your site here
   url: 'https://your-docusaurus-site.example.com',
   // Set the /<baseUrl>/ pathname under which your site is served
@@ -28,7 +35,6 @@ const config: Config = {
   projectName: 'docusaurus-plugins', // Usually your repo name.
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you

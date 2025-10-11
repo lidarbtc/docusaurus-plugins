@@ -9,7 +9,7 @@ import { getEffectiveConfigForRoute, getStructureConfig } from '../config';
 import { findQualityIssues } from '../config/section-validator';
 import { TREE_ROOT_NAME, INDEX_IDENTIFIER } from '../constants';
 import { handleSectionError } from '../errors/section-errors';
-import { ensureLeadingSlash } from '../utils';
+import { ensureLeadingSlash, sortByPosition } from '../utils';
 
 import type {
   DocInfo,
@@ -250,6 +250,7 @@ function buildHierarchicalTree(
       id: section.id,
       name: section.name,
       description: section.description,
+      position: section.position,
       relPath: section.id,
       docs: section.docs,
       subCategories: sortByPosition(subsections.map(createTreeNode)),
@@ -263,37 +264,6 @@ function buildHierarchicalTree(
   );
 
   return root;
-}
-
-/**
- * Sort items by position + alphabetical (Docusaurus-style)
- */
-function sortByPosition<T extends { position?: number; name: string }>(
-  items: T[]
-): T[] {
-  return items.sort((a, b) => {
-    // 1. Items with position come before items without position
-    const aHasPosition = a.position !== undefined;
-    const bHasPosition = b.position !== undefined;
-
-    if (aHasPosition && !bHasPosition) {
-      return -1;
-    }
-    if (!aHasPosition && bHasPosition) {
-      return 1;
-    }
-
-    // 2. If both have positions, sort by position numerically
-    if (aHasPosition && bHasPosition) {
-      const positionDiff = a.position! - b.position!;
-      if (positionDiff !== 0) {
-        return positionDiff;
-      }
-    }
-
-    // 3. If same position (or both undefined), sort alphabetically
-    return a.name.localeCompare(b.name);
-  });
 }
 
 /**

@@ -6,6 +6,8 @@
  */
 import { useState, useEffect } from 'react';
 
+import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
+
 // JSON data structure
 interface CopyContentData {
   [routePath: string]: boolean;
@@ -24,6 +26,11 @@ export default function useCopyContentData(dataUrl: string | undefined): {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Skip fetching during SSR - prevents hydration mismatch
+    if (!ExecutionEnvironment.canUseDOM) {
+      return undefined;
+    }
+
     if (!dataUrl) {
       setIsLoading(false);
       setData(null);

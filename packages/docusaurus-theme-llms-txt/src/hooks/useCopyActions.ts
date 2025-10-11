@@ -73,12 +73,12 @@ export default function useCopyActions(
         setTimeout(() => setCopyStatus('idle'), 3000);
       }
     } else if (action === 'openChatGPT' && siteConfig) {
-      // Open ChatGPT with content
+      // Open ChatGPT with content and search hints enabled
       const fullUrl = constructFullUrl(pathname, siteConfig);
       const encodedPrompt = encodeURIComponent(
         `${finalConfig.chatGPT.prompt} ${fullUrl}`
       );
-      const chatUrl = `https://chatgpt.com/?q=${encodedPrompt}`;
+      const chatUrl = `https://chatgpt.com/?hints=search&prompt=${encodedPrompt}`;
       window.open(chatUrl, '_blank');
       setCopyStatus('success');
       setTimeout(() => setCopyStatus('idle'), 2000);

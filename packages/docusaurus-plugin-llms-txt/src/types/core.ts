@@ -79,6 +79,7 @@ export interface TreeNode {
   readonly subCategories: readonly TreeNode[];
   readonly title?: string;
   readonly description?: string;
+  readonly position?: number;
   readonly indexDoc?: DocInfo;
 }
 
