@@ -8,9 +8,12 @@ import { useState, useEffect } from 'react';
 
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 
-// JSON data structure
+// JSON data structure - per-route copy content info
 interface CopyContentData {
-  [routePath: string]: boolean;
+  [routePath: string]: {
+    hasMarkdown: boolean;
+    contentSelectors: readonly string[];
+  };
 }
 
 // Simple in-memory cache: URL → data

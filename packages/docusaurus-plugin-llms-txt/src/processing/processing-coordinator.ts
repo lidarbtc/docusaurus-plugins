@@ -143,6 +143,10 @@ export async function coordinateProcessing(
       if (processedPaths.has(route.path)) {
         // Find the updated route from processing
         const updatedRoute = cachedRoutes.find((r) => r.path === route.path);
+        // Preserve contentSelectors from the original route if not in updated route
+        if (updatedRoute && !updatedRoute.contentSelectors && route.contentSelectors) {
+          return { ...updatedRoute, contentSelectors: route.contentSelectors };
+        }
         return updatedRoute ?? route;
       }
       return route;

@@ -65,6 +65,7 @@ declare module '@theme/CopyPageContent/DropdownMenu' {
     readonly finalConfig: any;
     readonly onAction: (action: string) => void;
     readonly isMobile?: boolean;
+    readonly hasMarkdown?: boolean;
   }
 
   export default function DropdownMenu(props: Props): ReactNode;
@@ -87,6 +88,7 @@ declare module '@theme/CopyPageContent/DropdownMenu/MenuItem' {
 declare module '@theme/CopyPageContent/Icons' {
   export { default as ChevronIcon } from '@theme/CopyPageContent/Icons/ChevronIcon';
   export { default as MarkdownIcon } from '@theme/CopyPageContent/Icons/MarkdownIcon';
+  export { default as HtmlIcon } from '@theme/CopyPageContent/Icons/HtmlIcon';
   export { default as ChatGPTIcon } from '@theme/CopyPageContent/Icons/ChatGPTIcon';
   export { default as ClaudeIcon } from '@theme/CopyPageContent/Icons/ClaudeIcon';
 }
@@ -102,6 +104,11 @@ declare module '@theme/CopyPageContent/Icons/ChevronIcon' {
 declare module '@theme/CopyPageContent/Icons/MarkdownIcon' {
   import type { ReactNode } from 'react';
   export default function MarkdownIcon(): ReactNode;
+}
+
+declare module '@theme/CopyPageContent/Icons/HtmlIcon' {
+  import type { ReactNode } from 'react';
+  export default function HtmlIcon(): ReactNode;
 }
 
 declare module '@theme/CopyPageContent/Icons/ChatGPTIcon' {

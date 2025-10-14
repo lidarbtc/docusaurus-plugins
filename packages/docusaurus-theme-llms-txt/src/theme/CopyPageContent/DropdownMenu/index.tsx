@@ -14,16 +14,18 @@ import MenuItem from '@theme/CopyPageContent/DropdownMenu/MenuItem';
 import ChatGPTIcon from '@theme/CopyPageContent/Icons/ChatGPTIcon';
 import ClaudeIcon from '@theme/CopyPageContent/Icons/ClaudeIcon';
 import MarkdownIcon from '@theme/CopyPageContent/Icons/MarkdownIcon';
+import HtmlIcon from '@theme/CopyPageContent/Icons/HtmlIcon';
 
 import type { ResolvedCopyPageContentOptions } from '../../../hooks';
 
 import styles from './styles.module.css';
 
-interface DropdownMenuProps {
+export interface DropdownMenuProps {
   isOpen: boolean;
   finalConfig: ResolvedCopyPageContentOptions;
   onAction: (action: string) => void;
   isMobile?: boolean;
+  hasMarkdown?: boolean;
 }
 
 export default function DropdownMenu({
@@ -31,6 +33,7 @@ export default function DropdownMenu({
   finalConfig,
   onAction,
   isMobile = false,
+  hasMarkdown = true,
 }: DropdownMenuProps): React.JSX.Element {
   // Memoize action handlers to prevent unnecessary re-renders of MenuItem
   const handleCopyRaw = useCallback(() => onAction('copyRaw'), [onAction]);
@@ -47,11 +50,15 @@ export default function DropdownMenu({
     >
       {finalConfig.markdown && (
         <MenuItem
-          icon={<MarkdownIcon />}
-          description='Copy page as Markdown for LLMs'
+          icon={hasMarkdown ? <MarkdownIcon /> : <HtmlIcon />}
+          description={hasMarkdown ? 'Copy page as Markdown for LLMs' : 'Copy page as HTML for LLMs'}
           onClick={handleCopyRaw}
         >
-          <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
+          {hasMarkdown ? (
+            <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
+          ) : (
+            <Translate id='copyPage.copyRawHtml'>Copy Raw HTML</Translate>
+          )}
         </MenuItem>
       )}
 

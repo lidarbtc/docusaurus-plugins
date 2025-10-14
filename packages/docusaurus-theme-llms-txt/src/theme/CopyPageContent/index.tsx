@@ -32,7 +32,6 @@ import styles from './styles.module.css';
 export default function CopyPageContent({
   isMobile = false,
 }: CopyPageContentProps): React.JSX.Element | null {
-  // Get current pathname from Docusaurus router
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -51,11 +50,18 @@ export default function CopyPageContent({
   // Resolve final configuration
   const finalConfig = useCopyButtonConfig(pluginConfig);
 
+  // Get route data for current path
+  const routeData = copyContentData?.[pathname];
+  const hasMarkdown = typeof routeData === 'object' ? routeData.hasMarkdown : false;
+  const contentSelectors = typeof routeData === 'object' ? routeData.contentSelectors : undefined;
+
   // Action handlers
   const { copyStatus, handleAction } = useCopyActions(
     finalConfig,
     siteConfig!,
-    setIsOpen
+    setIsOpen,
+    hasMarkdown,
+    contentSelectors
   );
 
   // Memoize action handlers to prevent unnecessary re-renders
@@ -68,13 +74,10 @@ export default function CopyPageContent({
     [toggleDropdown]
   );
 
-  // Don't render if disabled, loading, or no markdown available
-  if (
-    pluginConfig === false ||
-    isLoading ||
-    !copyContentData?.[pathname] ||
-    !siteConfig
-  ) {
+  // Don't render if disabled, loading, or no site config
+  // TODO: Re-enable markdown check after testing HTML fallback
+  // Temporarily disabled to test HTML fallback functionality
+  if (pluginConfig === false || isLoading || !siteConfig) {
     return null;
   }
 
@@ -98,6 +101,7 @@ export default function CopyPageContent({
         finalConfig={finalConfig}
         onAction={handleAction}
         isMobile={isMobile}
+        hasMarkdown={hasMarkdown}
       />
     </div>
   );

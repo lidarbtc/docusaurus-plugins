@@ -126,8 +126,16 @@ async function processRoutesStream(
     outDir,
     siteConfig
   );
+  // Check if existing cached routes have contentSelectors field
+  // If not, we need to regenerate them to include the new field
+  const needsRegeneration =
+    existingCachedRoutes &&
+    existingCachedRoutes.some((route) => !route.contentSelectors);
+
   const cachedRoutes =
-    existingCachedRoutes ?? cacheManager.createCachedRouteInfo(routes);
+    existingCachedRoutes && !needsRegeneration
+      ? existingCachedRoutes
+      : cacheManager.createCachedRouteInfo(routes);
   const directories = { docsDir, mdOutDir };
 
   // Create route lookup table for link resolution

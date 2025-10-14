@@ -10,16 +10,20 @@ import { useLocation } from '@docusaurus/router';
 
 import {
   constructMarkdownUrl,
+  constructHtmlUrl,
   constructFullUrl,
   type SiteConfig,
 } from '../utils/copyButton';
+import { extractHtmlContent } from '../utils/htmlExtractor';
 
 import type { ResolvedCopyPageContentOptions } from './useCopyButtonConfig';
 
 export default function useCopyActions(
   finalConfig: ResolvedCopyPageContentOptions,
   siteConfig: SiteConfig | undefined,
-  setIsOpen: (isOpen: boolean) => void
+  setIsOpen: (isOpen: boolean) => void,
+  hasMarkdown?: boolean,
+  contentSelectors?: readonly string[]
 ): {
   copyStatus: 'idle' | 'success' | 'error';
   handleAction: (action: string) => Promise<void>;
@@ -34,21 +38,47 @@ export default function useCopyActions(
     setIsOpen(false);
 
     if (action === 'copyRaw') {
-      // Copy raw markdown content using ClipboardItem with Promise
+      // Copy content using ClipboardItem with Promise
       // This approach works across all modern browsers and maintains
       // user gesture context required by Safari
       try {
-        const markdownUrl = constructMarkdownUrl(pathname);
+        let textPromise: Promise<Blob>;
 
-        // Create a promise that fetches and returns the content as a Blob
-        const textPromise = fetch(markdownUrl)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch markdown');
-            }
-            return response.text();
-          })
-          .then((text) => new Blob([text], { type: 'text/plain' }));
+        if (hasMarkdown) {
+          // Fetch markdown content directly
+          const markdownUrl = constructMarkdownUrl(pathname);
+          textPromise = fetch(markdownUrl)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Failed to fetch markdown: ${response.status}`);
+              }
+              return response.text();
+            })
+            .then((text) => new Blob([text], { type: 'text/plain' }));
+        } else {
+          // No markdown available - fetch and extract HTML content
+          const htmlUrl = constructHtmlUrl(
+            pathname,
+            siteConfig?.trailingSlash
+          );
+          console.debug('No markdown available, fetching HTML content');
+
+          textPromise = fetch(htmlUrl)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Failed to fetch HTML: ${response.status}`);
+              }
+              return response.text();
+            })
+            .then((html) => {
+              // Extract content using selectors
+              const extracted =
+                contentSelectors && contentSelectors.length > 0
+                  ? extractHtmlContent(html, contentSelectors)
+                  : null;
+              return new Blob([extracted || html], { type: 'text/plain' });
+            });
+        }
 
         // Create ClipboardItem with the promise
         const clipboardItem = new ClipboardItem({
@@ -74,7 +104,7 @@ export default function useCopyActions(
       }
     } else if (action === 'openChatGPT' && siteConfig) {
       // Open ChatGPT with content and search hints enabled
-      const fullUrl = constructFullUrl(pathname, siteConfig);
+      const fullUrl = constructFullUrl(pathname, siteConfig, hasMarkdown);
       const encodedPrompt = encodeURIComponent(
         `${finalConfig.chatGPT.prompt} ${fullUrl}`
       );
@@ -84,7 +114,7 @@ export default function useCopyActions(
       setTimeout(() => setCopyStatus('idle'), 2000);
     } else if (action === 'openClaude' && siteConfig) {
       // Open Claude with content
-      const fullUrl = constructFullUrl(pathname, siteConfig);
+      const fullUrl = constructFullUrl(pathname, siteConfig, hasMarkdown);
       const encodedPrompt = encodeURIComponent(
         `${finalConfig.claude.prompt} ${fullUrl}`
       );
