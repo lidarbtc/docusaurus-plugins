@@ -51,6 +51,7 @@ declare module '@theme/CopyPageContent/CopyButton' {
     readonly isOpen: boolean;
     readonly onMainAction: () => void | Promise<void>;
     readonly onDropdownToggle: () => void;
+    readonly hasMarkdown?: boolean;
   }
 
   export default function CopyButton(props: Props): ReactNode;

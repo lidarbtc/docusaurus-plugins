@@ -16,21 +16,25 @@ import type { ResolvedCopyPageContentOptions } from '../../../hooks';
 
 import styles from './styles.module.css';
 
-interface CopyButtonProps {
+export interface CopyButtonProps {
   copyStatus: 'idle' | 'success' | 'error';
   finalConfig: ResolvedCopyPageContentOptions;
   isOpen: boolean;
   onMainAction: () => void | Promise<void>;
   onDropdownToggle: () => void;
+  hasMarkdown?: boolean;
 }
 
-export default function CopyButton({
+function CopyButton({
   copyStatus,
   finalConfig,
   isOpen,
   onMainAction,
   onDropdownToggle,
+  hasMarkdown,
 }: CopyButtonProps): React.JSX.Element {
+  const ariaLabel = copyStatus === 'success' ? 'Copied' : 'Copy page';
+
   return (
     <div
       className={clsx(
@@ -42,9 +46,7 @@ export default function CopyButton({
         type='button'
         className={styles.mainButton}
         onClick={onMainAction}
-        aria-label={
-          copyStatus === 'success' ? 'Copied' : 'Copy page as Markdown'
-        }
+        aria-label={ariaLabel}
       >
         {copyStatus === 'success' ? (
           <MdCheck className={styles.icon} />
@@ -68,3 +70,5 @@ export default function CopyButton({
     </div>
   );
 }
+
+export default CopyButton;

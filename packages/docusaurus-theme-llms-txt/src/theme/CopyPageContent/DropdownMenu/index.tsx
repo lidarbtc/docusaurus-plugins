@@ -36,6 +36,10 @@ export default function DropdownMenu({
   isMobile = false,
   hasMarkdown = true,
 }: DropdownMenuProps): React.JSX.Element {
+  // Determine what content will actually be copied based on contentStrategy
+  const willCopyMarkdown =
+    finalConfig.contentStrategy === 'prefer-markdown' && hasMarkdown;
+
   // Memoize action handlers to prevent unnecessary re-renders of MenuItem
   const handleCopyRaw = useCallback(() => onAction('copyRaw'), [onAction]);
   const handleViewMarkdown = useCallback(() => onAction('viewMarkdown'), [onAction]);
@@ -51,11 +55,11 @@ export default function DropdownMenu({
       )}
     >
       <MenuItem
-        icon={<CopyIcon />}
-        description={hasMarkdown ? 'Copy page as Markdown for LLMs' : 'Copy page as HTML for LLMs'}
+        icon={willCopyMarkdown ? <MarkdownIcon /> : <HtmlIcon />}
+        description={willCopyMarkdown ? 'Copy page as Markdown for LLMs' : 'Copy page as HTML for LLMs'}
         onClick={handleCopyRaw}
       >
-        {hasMarkdown ? (
+        {willCopyMarkdown ? (
           <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
         ) : (
           <Translate id='copyPage.copyRawHtml'>Copy Raw HTML</Translate>
