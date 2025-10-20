@@ -9,8 +9,6 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 
-import { generateSectionId } from '../utils';
-
 import type { Logger } from '../types';
 import type { AttachmentFile } from '../types/public';
 
@@ -41,7 +39,7 @@ export class AttachmentProcessor {
    * Process attachment files and copy them to the output directory
    */
   async processAttachments(
-    attachments: readonly AttachmentFile[],
+    attachments: readonly (AttachmentFile & { sectionId: string })[],
     siteDir: string,
     outDir: string
   ): Promise<ProcessedAttachment[]> {
@@ -85,9 +83,8 @@ export class AttachmentProcessor {
           `Copied attachment ${attachment.source} to ${outputFileName}`
         );
 
-        // Use sectionId directly (auto-assign if not provided)
-        const sectionId =
-          attachment.sectionId || generateSectionId('attachments');
+        // Use sectionId from attachment (provided by collectAllAttachments)
+        const sectionId = attachment.sectionId;
 
         // Create metadata for llms.txt and llms-full.txt
         processed.push({

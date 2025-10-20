@@ -44,7 +44,11 @@ export default function useCopyActions(
       try {
         let textPromise: Promise<Blob>;
 
-        if (hasMarkdown) {
+        // Check contentStrategy - if html-only, always fetch HTML
+        const shouldFetchMarkdown =
+          finalConfig.contentStrategy === 'prefer-markdown' && hasMarkdown;
+
+        if (shouldFetchMarkdown) {
           // Fetch markdown content directly
           const markdownUrl = constructMarkdownUrl(pathname);
           textPromise = fetch(markdownUrl)
@@ -102,6 +106,13 @@ export default function useCopyActions(
         setCopyStatus('error');
         setTimeout(() => setCopyStatus('idle'), 3000);
       }
+    } else if (action === 'viewMarkdown' && siteConfig) {
+      // Open markdown file in new tab
+      const markdownUrl = constructMarkdownUrl(pathname);
+      const fullUrl = `${siteConfig.url}${siteConfig.baseUrl}${markdownUrl.startsWith('/') ? markdownUrl.slice(1) : markdownUrl}`;
+      window.open(fullUrl, '_blank');
+      setCopyStatus('success');
+      setTimeout(() => setCopyStatus('idle'), 2000);
     } else if (action === 'openChatGPT' && siteConfig) {
       // Open ChatGPT with content and search hints enabled
       const fullUrl = constructFullUrl(pathname, siteConfig, hasMarkdown);

@@ -20,10 +20,8 @@ export { default, validateOptions } from '../index';
 // Export public types
 export type {
   PluginOptions,
-  GenerateOptions,
-  IncludeOptions,
-  StructureOptions,
-  ProcessingOptions,
+  MarkdownOptions,
+  LlmsTxtOptions,
   UiOptions,
   SectionDefinition,
   RouteRule,

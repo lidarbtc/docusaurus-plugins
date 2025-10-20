@@ -9,20 +9,33 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 
+import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 import { DEFAULT_CONTENT_SELECTORS } from '../constants';
 
-import type { CachedRouteInfo, Logger } from '../types';
+import type { CachedRouteInfo, Logger, PluginOptions } from '../types';
 
 export async function generateCopyContentJson(
   processedRoutes: CachedRouteInfo[],
   filePath: string,
-  logger: Logger
+  logger: Logger,
+  config: PluginOptions
 ): Promise<void> {
   try {
+    // Get UI config for copy button display settings
+    const uiConfig =
+      typeof config.ui?.copyPageContent === 'object'
+        ? config.ui.copyPageContent
+        : {};
+    const excludeRoutes = uiConfig.display?.excludeRoutes ?? [];
+
+    // Create exclusion matcher for server-side filtering
+    const isExcluded = createExclusionMatcher(excludeRoutes);
+
     // Build data structure: route path → route info with content selectors
     const copyContentData: Record<
       string,
       {
+        shouldDisplay: boolean;
         hasMarkdown: boolean;
         contentSelectors: readonly string[];
       }
@@ -30,6 +43,8 @@ export async function generateCopyContentJson(
 
     for (const route of processedRoutes) {
       copyContentData[route.path] = {
+        // Check if route should display button (based on excludeRoutes)
+        shouldDisplay: !isExcluded(route.path),
         // Routes with markdownFile have markdown content available
         hasMarkdown: Boolean(route.markdownFile),
         // Always include content selectors for HTML fallback extraction

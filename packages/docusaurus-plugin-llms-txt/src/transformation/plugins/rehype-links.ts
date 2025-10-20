@@ -113,10 +113,10 @@ function isExcludedLink(href: string, options: RehypeLinksOptions): boolean {
  * Check if link transformation should be skipped entirely
  */
 function shouldSkipLinkTransformation(options: RehypeLinksOptions): boolean {
-  const { enableMarkdownFiles = true, relativePaths = true } = options;
+  const { enableFiles = true, relativePaths = true } = options;
   // If relative paths are enabled and markdown files are disabled,
   // skip processing as links don't need transformation
-  return relativePaths && !enableMarkdownFiles;
+  return relativePaths && !enableFiles;
 }
 
 /**
@@ -134,7 +134,7 @@ function getExcludedLinkOptions(
   if (!relativePaths) {
     return {
       ...options,
-      enableMarkdownFiles: false, // Force no .md extension for excluded links
+      enableFiles: false, // Force no .md extension for excluded links
     };
   }
 
@@ -150,7 +150,7 @@ function transformInternalLink(
   options: RehypeLinksOptions
 ): string {
   const {
-    enableMarkdownFiles = true,
+    enableFiles = true,
     relativePaths = true,
     baseUrl = '',
   } = options;
@@ -186,7 +186,7 @@ function transformInternalLink(
   // Use our URL formatting utility for the pathname
   const transformedPathname = formatUrl(
     resolvedPathname,
-    { relativePaths, enableMarkdownFiles },
+    { relativePaths, enableFiles },
     baseUrl
   );
 
@@ -237,10 +237,10 @@ function processAnchorElement(
  * Rehype plugin that transforms internal links based on plugin configuration.
  *
  * This plugin automatically determines when to run:
- * - If relativePaths=true AND enableMarkdownFiles=false → plugin disabled
+ * - If relativePaths=true AND enableFiles=false → plugin disabled
  * - If relativePaths=false → prepend baseUrl to internal links
- * - If enableMarkdownFiles=true → append .md to internal links
- * - If relativePaths=false AND enableMarkdownFiles=true → do both
+ * - If enableFiles=true → append .md to internal links
+ * - If relativePaths=false AND enableFiles=true → do both
  *
  * Special handling for excluded links:
  * - If relativePaths=false → excluded links get baseUrl but NO .md extension

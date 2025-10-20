@@ -71,14 +71,14 @@ export function stripBaseUrl(routePath: string, baseUrl: string): string {
 export function formatUrl(
   routePath: string,
   options: {
-    enableMarkdownFiles?: boolean;
+    enableFiles?: boolean;
     relativePaths?: boolean;
     markdownFile?: string;
   },
   baseUrl = ''
 ): string {
   const {
-    enableMarkdownFiles = true,
+    enableFiles = true,
     relativePaths = true,
     markdownFile,
   } = options;
@@ -87,10 +87,10 @@ export function formatUrl(
   let targetPath = ensureLeadingSlash(routePath);
 
   // Use markdown file path if available and enabled
-  if (enableMarkdownFiles && markdownFile) {
+  if (enableFiles && markdownFile) {
     // Ensure markdown file path starts with / for consistency
     targetPath = ensureLeadingSlash(markdownFile);
-  } else if (enableMarkdownFiles) {
+  } else if (enableFiles) {
     // Add .md extension to route path
     targetPath = targetPath === '/' ? INDEX_MD : `${targetPath}.md`;
   }

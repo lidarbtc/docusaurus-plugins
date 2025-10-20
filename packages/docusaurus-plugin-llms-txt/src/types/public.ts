@@ -44,6 +44,10 @@ export interface SectionDefinition {
   readonly routes?: readonly SectionRoute[];
   /** User-defined nested subsections (IDs must be globally unique) */
   readonly subsections?: readonly SectionDefinition[];
+  /** Attachments specific to this section */
+  readonly attachments?: readonly AttachmentFile[];
+  /** Optional links specific to this section */
+  readonly optionalLinks?: readonly OptionalLink[];
 }
 
 /**
@@ -79,61 +83,37 @@ export type PluginInput =
   | [Plugin<unknown[], any, unknown>, unknown?, Settings?];
 
 /**
- * Output generation configuration
+ * Output generation configuration - controls what .md files are created
  */
-export interface GenerateOptions {
+/**
+ * Markdown file generation configuration
+ * Controls which routes get .md files generated (used by copy button feature)
+ */
+export interface MarkdownOptions {
   /** Whether to generate individual markdown files (default: true) */
-  readonly enableMarkdownFiles?: boolean;
-  /** Generate llms-full.txt with complete content (default: false) */
-  readonly enableLlmsFullTxt?: boolean;
+  readonly enableFiles?: boolean;
   /** Whether to use relative paths in links (default: true) */
   readonly relativePaths?: boolean;
-}
 
-/**
- * Content inclusion/filtering configuration
- */
-export interface IncludeOptions {
-  /** Include blog posts (default: false) */
-  readonly includeBlog?: boolean;
-  /** Include pages (default: false) */
-  readonly includePages?: boolean;
-  /** Include docs (default: true) */
+  // What routes get .md files generated
+  /** Include docs in markdown generation (default: true) */
   readonly includeDocs?: boolean;
-  /** Include versioned docs in addition to current version (default: true) */
+  /** Include versioned docs in markdown generation (default: true) */
   readonly includeVersionedDocs?: boolean;
-  /** Include generated category index pages (default: true) */
+  /** Include blog posts in markdown generation (default: false) */
+  readonly includeBlog?: boolean;
+  /** Include standalone pages in markdown generation (default: false) */
+  readonly includePages?: boolean;
+  /** Include generated category index pages in markdown generation (default: true) */
   readonly includeGeneratedIndex?: boolean;
-  /** Glob patterns to exclude from processing */
+  /** Exclude specific routes from markdown generation */
   readonly excludeRoutes?: readonly string[];
-}
 
-/**
- * Content structure and organization configuration
- */
-export interface StructureOptions {
-  /** Section definitions for organizing content */
-  readonly sections?: readonly SectionDefinition[];
-  /** Site title for llms.txt header */
-  readonly siteTitle?: string;
-  /** Site description for llms.txt header */
-  readonly siteDescription?: string;
-  /** Whether to include descriptions in llms.txt links (default: true) */
-  readonly enableDescriptions?: boolean;
-  /** Additional links to include in llms.txt */
-  readonly optionalLinks?: readonly OptionalLink[];
-}
-
-/**
- * Content processing and transformation configuration
- */
-export interface ProcessingOptions {
+  // Content extraction and processing
   /** CSS selectors for content extraction */
   readonly contentSelectors?: readonly string[];
   /** Route-specific processing rules */
   readonly routeRules?: readonly RouteRule[];
-  /** Raw files to attach and include in llms.txt/llms-full.txt */
-  readonly attachments?: readonly AttachmentFile[];
 
   // Markdown processing options
   /** Remark stringify options for markdown generation */
@@ -155,6 +135,54 @@ export interface ProcessingOptions {
 }
 
 /**
+ * llms.txt index file configuration
+ * Controls what content appears in the main /llms.txt file
+ */
+export interface LlmsTxtOptions {
+  /** Generate llms-full.txt with complete content (default: false) */
+  readonly enableLlmsFullTxt?: boolean;
+
+  // Content filtering - what goes in llms.txt
+  /** Include docs in main llms.txt (default: true) */
+  readonly includeDocs?: boolean;
+  /** Include versioned docs in main llms.txt (default: false) */
+  readonly includeVersionedDocs?: boolean;
+  /** Include blog posts in main llms.txt (default: false) */
+  readonly includeBlog?: boolean;
+  /** Include standalone pages in main llms.txt (default: false) */
+  readonly includePages?: boolean;
+  /** Include generated category index pages in main llms.txt (default: true) */
+  readonly includeGeneratedIndex?: boolean;
+  /** Exclude specific routes from main llms.txt */
+  readonly excludeRoutes?: readonly string[];
+
+  // Structure and organization
+  /** Section definitions for organizing content */
+  readonly sections?: readonly SectionDefinition[];
+  /** Site title for llms.txt header */
+  readonly siteTitle?: string;
+  /** Site description for llms.txt header */
+  readonly siteDescription?: string;
+  /** Whether to include descriptions in llms.txt links (default: true) */
+  readonly enableDescriptions?: boolean;
+  /** Automatically determine section heading depth based on route depth (default: 1)
+   * - 1: /api becomes H1, /api/guide becomes H2, etc.
+   * - 2: /api becomes H2, /api/guide becomes H3, etc.
+   */
+  readonly autoSectionDepth?: 1 | 2 | 3 | 4 | 5 | 6;
+  /** Position value assigned to auto-generated sections (default: undefined)
+   * - undefined: auto-sections appear after all positioned sections, sorted alphabetically
+   * - number: auto-sections get this position value and sort with other positioned sections
+   */
+  readonly autoSectionPosition?: number;
+  /** Additional links to include in llms.txt */
+  readonly optionalLinks?: readonly OptionalLink[];
+
+  // Additional content
+  /** Raw files to attach and include in llms.txt/llms-full.txt */
+  readonly attachments?: readonly AttachmentFile[];
+}
+/**
  * User interface features configuration
  */
 export interface UiOptions {
@@ -168,10 +196,19 @@ export interface UiOptions {
 export interface CopyPageContentOptions {
   /** Custom button label (default: 'Copy Page') */
   readonly buttonLabel?: string;
-  /** Available copy and share actions */
+  /** Control where the copy button is displayed */
+  readonly display?: {
+    /** Show on docs pages (default: true) */
+    readonly docs?: boolean;
+    /** Exclude specific routes by path pattern */
+    readonly excludeRoutes?: readonly string[];
+  };
+  /** Strategy for what content to copy (default: 'prefer-markdown') */
+  readonly contentStrategy?: 'prefer-markdown' | 'html-only';
+  /** Available actions in the dropdown menu */
   readonly actions?: {
-    /** Enable markdown copy option (default: true) */
-    readonly markdown?: boolean;
+    /** Enable view markdown option (default: true) - only shows when markdown is available */
+    readonly viewMarkdown?: boolean;
     /** AI integration options */
     readonly ai?: {
       /** ChatGPT integration - true enables with default prompt */
@@ -200,8 +237,6 @@ export interface AttachmentFile {
   readonly title: string;
   /** Optional description */
   readonly description?: string;
-  /** Section ID to place the attachment under */
-  readonly sectionId?: string;
   /** Whether to include this attachment's content in llms-full.txt
    * (default: true) */
   readonly includeInFullTxt?: boolean;
@@ -225,14 +260,10 @@ export interface PluginOptions {
   readonly runOnPostBuild?: boolean;
 
   // Grouped configuration options
-  /** Output generation configuration */
-  readonly generate?: GenerateOptions;
-  /** Content inclusion/filtering configuration */
-  readonly include?: IncludeOptions;
-  /** Content structure and organization configuration */
-  readonly structure?: StructureOptions;
-  /** Content processing and transformation configuration */
-  readonly processing?: ProcessingOptions;
+  /** Markdown file generation - controls .md file creation and processing */
+  readonly markdown?: MarkdownOptions;
+  /** llms.txt index file - controls what goes in main /llms.txt */
+  readonly llmsTxt?: LlmsTxtOptions;
   /** User interface features configuration */
   readonly ui?: UiOptions;
 }
@@ -300,25 +331,52 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
   logLevel: Joi.number().integer().min(0).max(3).default(1),
   runOnPostBuild: Joi.boolean().default(true),
 
-  // Output generation configuration
-  generate: Joi.object({
-    enableMarkdownFiles: Joi.boolean().default(true),
-    enableLlmsFullTxt: Joi.boolean().default(false),
+  // Markdown file generation - controls .md file creation and processing
+  markdown: Joi.object({
+    enableFiles: Joi.boolean().default(true),
     relativePaths: Joi.boolean().default(true),
-  }).default({}),
-
-  // Content inclusion/filtering configuration
-  include: Joi.object({
-    includeBlog: Joi.boolean().default(false),
-    includePages: Joi.boolean().default(false),
     includeDocs: Joi.boolean().default(true),
     includeVersionedDocs: Joi.boolean().default(true),
+    includeBlog: Joi.boolean().default(false),
+    includePages: Joi.boolean().default(false),
     includeGeneratedIndex: Joi.boolean().default(true),
     excludeRoutes: Joi.array().items(Joi.string()).default([]),
+    // Content extraction and processing
+    contentSelectors: Joi.array()
+      .items(Joi.string())
+      .min(1)
+      .default([...DEFAULT_CONTENT_SELECTORS]),
+    routeRules: Joi.array()
+      .items(
+        Joi.object({
+          route: Joi.string().required(),
+          contentSelectors: Joi.array().items(Joi.string()),
+        })
+      )
+      .default([]),
+    // Markdown processing options
+    remarkStringify: Joi.object().unknown(true).default({}),
+    remarkGfm: Joi.alternatives()
+      .try(Joi.boolean(), Joi.object().unknown(true))
+      .default(true),
+    rehypeProcessTables: Joi.boolean().default(true),
+    // Unified plugin system
+    beforeDefaultRehypePlugins: Joi.array().items(Joi.any()).default([]),
+    rehypePlugins: Joi.array().items(Joi.any()).default([]),
+    beforeDefaultRemarkPlugins: Joi.array().items(Joi.any()).default([]),
+    remarkPlugins: Joi.array().items(Joi.any()).default([]),
   }).default({}),
 
-  // Content structure and organization configuration
-  structure: Joi.object({
+  // llms.txt index file - controls what goes in main /llms.txt
+  llmsTxt: Joi.object({
+    enableLlmsFullTxt: Joi.boolean().default(false),
+    includeDocs: Joi.boolean().default(true),
+    includeVersionedDocs: Joi.boolean().default(false),
+    includeBlog: Joi.boolean().default(false),
+    includePages: Joi.boolean().default(false),
+    includeGeneratedIndex: Joi.boolean().default(true),
+    excludeRoutes: Joi.array().items(Joi.string()).default([]),
+    // Structure and organization
     sections: Joi.array().items(
       Joi.object({
         id: Joi.string()
@@ -334,11 +392,34 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
           })
         ),
         subsections: Joi.array().items(Joi.link('#sectionDefinition')),
+        // Section-specific attachments
+        attachments: Joi.array()
+          .items(
+            Joi.object({
+              source: Joi.string().required(),
+              title: Joi.string().required(),
+              description: Joi.string(),
+              includeInFullTxt: Joi.boolean().default(true),
+            })
+          )
+          .default([]),
+        // Section-specific optional links
+        optionalLinks: Joi.array()
+          .items(
+            Joi.object({
+              title: Joi.string().required(),
+              url: Joi.string().required(),
+              description: Joi.string(),
+            })
+          )
+          .default([]),
       }).id('sectionDefinition')
     ),
     siteTitle: Joi.string().allow(''),
     siteDescription: Joi.string().allow(''),
     enableDescriptions: Joi.boolean().default(true),
+    autoSectionDepth: Joi.number().valid(1, 2, 3, 4, 5, 6).default(1),
+    autoSectionPosition: Joi.number(),
     optionalLinks: Joi.array()
       .items(
         Joi.object({
@@ -348,72 +429,15 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
         })
       )
       .default([]),
-  }).default({}),
-
-  // Content processing and transformation configuration
-  processing: Joi.object({
-    contentSelectors: Joi.array()
-      .items(Joi.string())
-      .min(1)
-      .default([...DEFAULT_CONTENT_SELECTORS]),
-    routeRules: Joi.array()
-      .items(
-        Joi.object({
-          route: Joi.string().required(),
-          contentSelectors: Joi.array().items(Joi.string()),
-        })
-      )
-      .default([]),
+    // Global attachments (will be placed in their own section)
     attachments: Joi.array()
       .items(
         Joi.object({
           source: Joi.string().required(),
           title: Joi.string().required(),
           description: Joi.string(),
-          sectionId: Joi.string().pattern(/^[a-z0-9-]+$/),
           includeInFullTxt: Joi.boolean().default(true),
         })
-      )
-      .default([]),
-
-    // Markdown processing options
-    remarkStringify: Joi.object().unknown(true).default({}),
-    remarkGfm: Joi.alternatives()
-      .try(Joi.boolean(), Joi.object().unknown(true))
-      .default(true),
-    rehypeProcessTables: Joi.boolean().default(true),
-
-    // Unified plugin system (standard unified.js formats)
-    beforeDefaultRehypePlugins: Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.function(),
-          Joi.array().items(Joi.function(), Joi.any(), Joi.any()).min(1).max(3)
-        )
-      )
-      .default([]),
-    rehypePlugins: Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.function(),
-          Joi.array().items(Joi.function(), Joi.any(), Joi.any()).min(1).max(3)
-        )
-      )
-      .default([]),
-    beforeDefaultRemarkPlugins: Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.function(),
-          Joi.array().items(Joi.function(), Joi.any(), Joi.any()).min(1).max(3)
-        )
-      )
-      .default([]),
-    remarkPlugins: Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.function(),
-          Joi.array().items(Joi.function(), Joi.any(), Joi.any()).min(1).max(3)
-        )
       )
       .default([]),
   }).default({}),
@@ -425,8 +449,15 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
         Joi.boolean(),
         Joi.object({
           buttonLabel: Joi.string().default('Copy Page'),
+          display: Joi.object({
+            docs: Joi.boolean().default(true),
+            excludeRoutes: Joi.array().items(Joi.string()).default([]),
+          }).default({}),
+          contentStrategy: Joi.string()
+            .valid('prefer-markdown', 'html-only')
+            .default('prefer-markdown'),
           actions: Joi.object({
-            markdown: Joi.boolean().default(true),
+            viewMarkdown: Joi.boolean().default(true),
             ai: Joi.object({
               chatGPT: Joi.alternatives()
                 .try(

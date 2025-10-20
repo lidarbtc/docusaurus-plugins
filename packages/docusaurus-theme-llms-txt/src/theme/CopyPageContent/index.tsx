@@ -52,8 +52,12 @@ export default function CopyPageContent({
 
   // Get route data for current path
   const routeData = copyContentData?.[pathname];
-  const hasMarkdown = typeof routeData === 'object' ? routeData.hasMarkdown : false;
-  const contentSelectors = typeof routeData === 'object' ? routeData.contentSelectors : undefined;
+  const shouldDisplay =
+    typeof routeData === 'object' ? routeData.shouldDisplay : false;
+  const hasMarkdown =
+    typeof routeData === 'object' ? routeData.hasMarkdown : false;
+  const contentSelectors =
+    typeof routeData === 'object' ? routeData.contentSelectors : undefined;
 
   // Action handlers
   const { copyStatus, handleAction } = useCopyActions(
@@ -75,9 +79,19 @@ export default function CopyPageContent({
   );
 
   // Don't render if disabled, loading, or no site config
-  // TODO: Re-enable markdown check after testing HTML fallback
-  // Temporarily disabled to test HTML fallback functionality
   if (pluginConfig === false || isLoading || !siteConfig) {
+    return null;
+  }
+
+  // Check if button should be displayed
+  // shouldDisplay is calculated server-side based on excludeRoutes config
+  if (!shouldDisplay) {
+    return null;
+  }
+
+  // Check display configuration
+  // For now, we only support docs pages, so if docs is false, don't render
+  if (!finalConfig.display.docs) {
     return null;
   }
 

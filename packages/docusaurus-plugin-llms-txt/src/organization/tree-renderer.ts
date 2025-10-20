@@ -27,23 +27,34 @@ function areSimilarTitles(a: string, b: string): boolean {
  */
 export function renderTreeAsMarkdown(
   node: TreeNode,
-  level: number = DEFAULT_MARKDOWN_HEADER_LEVEL,
+  autoSectionDepth: number = 1,
   isRoot: boolean = false,
   baseUrl: string = '',
   useRelativePaths: boolean = true,
-  enableMarkdownFiles: boolean = true,
+  enableFiles: boolean = true,
   enableDescriptions: boolean = true
 ): string {
   let md = '';
+
+  // Calculate heading level based on route depth
+  // autoSectionDepth is the base heading level added to route depth
+  // For example: autoSectionDepth=1 means depth-1 routes get H2 (1+1)
+  //              autoSectionDepth=2 means depth-1 routes get H3 (2+1)
+  const calculateHeadingLevel = (relPath: string): number => {
+    // Count path segments (e.g., "api" or "api-docs" = 1, "docs/guide" = 2)
+    const segments = relPath.split('/').filter(Boolean);
+    const routeDepth = segments.length;
+    // Heading level = autoSectionDepth + routeDepth
+    return Math.min(autoSectionDepth + routeDepth, 6);
+  };
 
   // Handle section heading and description
   if (!isRoot && node.name) {
     const shouldHeader =
       !node.indexDoc || !areSimilarTitles(node.name, node.indexDoc.title);
     if (shouldHeader) {
-      // Cap at H6 to respect markdown heading limits
-      const cappedLevel = Math.min(level, 6);
-      md += `${'#'.repeat(cappedLevel)} ${node.name}\n\n`;
+      const headingLevel = calculateHeadingLevel(node.relPath);
+      md += `${'#'.repeat(headingLevel)} ${node.name}\n\n`;
 
       // Prefer section description over index doc description
       if (enableDescriptions && node.description) {
@@ -59,7 +70,7 @@ export function renderTreeAsMarkdown(
   if (node.indexDoc && !isRoot) {
     const formatOptions: Parameters<typeof formatUrl>[1] = {
       relativePaths: useRelativePaths,
-      enableMarkdownFiles,
+      enableFiles,
     };
 
     if (node.indexDoc.markdownFile) {
@@ -83,7 +94,7 @@ export function renderTreeAsMarkdown(
   node.docs.forEach((d: DocInfo) => {
     const formatOptions: Parameters<typeof formatUrl>[1] = {
       relativePaths: useRelativePaths,
-      enableMarkdownFiles,
+      enableFiles,
     };
 
     if (d.markdownFile) {
@@ -100,15 +111,13 @@ export function renderTreeAsMarkdown(
   // Process subcategories (already ordered by tree builder)
   if (node.subCategories.length) {
     node.subCategories.forEach((sub: TreeNode) => {
-      // Cap at H6 to respect markdown heading limits
-      const nextLevel = Math.min(isRoot ? level : level + 1, 6);
       md += `\n${renderTreeAsMarkdown(
         sub,
-        nextLevel,
+        autoSectionDepth,
         false,
         baseUrl,
         useRelativePaths,
-        enableMarkdownFiles,
+        enableFiles,
         enableDescriptions
       )}`;
     });

@@ -89,6 +89,7 @@ declare module '@theme/CopyPageContent/Icons' {
   export { default as ChevronIcon } from '@theme/CopyPageContent/Icons/ChevronIcon';
   export { default as MarkdownIcon } from '@theme/CopyPageContent/Icons/MarkdownIcon';
   export { default as HtmlIcon } from '@theme/CopyPageContent/Icons/HtmlIcon';
+  export { default as CopyIcon } from '@theme/CopyPageContent/Icons/CopyIcon';
   export { default as ChatGPTIcon } from '@theme/CopyPageContent/Icons/ChatGPTIcon';
   export { default as ClaudeIcon } from '@theme/CopyPageContent/Icons/ClaudeIcon';
 }
@@ -109,6 +110,11 @@ declare module '@theme/CopyPageContent/Icons/MarkdownIcon' {
 declare module '@theme/CopyPageContent/Icons/HtmlIcon' {
   import type { ReactNode } from 'react';
   export default function HtmlIcon(): ReactNode;
+}
+
+declare module '@theme/CopyPageContent/Icons/CopyIcon' {
+  import type { ReactNode } from 'react';
+  export default function CopyIcon(): ReactNode;
 }
 
 declare module '@theme/CopyPageContent/Icons/ChatGPTIcon' {

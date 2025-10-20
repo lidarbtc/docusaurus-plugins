@@ -10,7 +10,7 @@ import path from 'path';
 import { md5Hash } from '@docusaurus/utils';
 import fs from 'fs-extra';
 
-import { getGenerateConfig } from '../config';
+import { getMarkdownConfig } from '../config';
 
 import type {
   CachedRouteInfo,
@@ -93,9 +93,9 @@ export async function markdownFileStateMatches(
   currentConfig: PluginOptions,
   directories: DirectoryConfig
 ): Promise<ValidationResult> {
-  const generateConfig = getGenerateConfig(currentConfig);
+  const generateConfig = getMarkdownConfig(currentConfig);
 
-  if (!generateConfig.enableMarkdownFiles) {
+  if (!generateConfig.enableFiles) {
     // If markdown files are disabled, we don't care about their state
     return { isValid: true };
   }
@@ -172,23 +172,17 @@ export async function hashFile(filePath: string): Promise<string> {
 export function calcConfigHash(options: Partial<PluginOptions>): string {
   // Collect all options that affect output generation (not just filtering)
   const hashableOptions = {
-    // Output generation options (affect file creation)
-    generate: options.generate,
+    // Markdown file generation and processing options (affect file creation and transformation)
+    markdown: options.markdown,
 
-    // Structure options (affect content organization and headers)
-    structure: options.structure,
-
-    // Processing options (affect content transformation)
-    processing: options.processing,
+    // llms.txt index options (affect what goes in llms.txt, structure, and attachments)
+    llmsTxt: options.llmsTxt,
 
     // UI options (affect output features)
     ui: options.ui,
 
     // Top-level runtime options that affect generation
     onSectionError: options.onSectionError,
-
-    // Note: Filtering options (include.*) are excluded since they only affect
-    // which routes are processed, not how individual files are generated
   };
 
   // Remove undefined values for stable hashing

@@ -119,54 +119,67 @@ const config: Config = {
     [
       '@signalwire/docusaurus-plugin-llms-txt',
       {
-        // Generation options
-        generate: {
-          enableMarkdownFiles: true,
-          enableLlmsFullTxt: true,
+        // Markdown file generation options
+        markdown: {
+          enableFiles: true,
           relativePaths: true,
-        },
-
-        // Content inclusion
-        include: {
           includeBlog: true,
           includePages: true,
+          includeDocs: true,
+          includeVersionedDocs: true,
           excludeRoutes: ['/admin/**', '/internal/**'],
         },
 
-        // Content organization
-        structure: {
+        // llms.txt index file configuration
+        llmsTxt: {
+          enableLlmsFullTxt: true,
+          includeBlog: true,
+          includePages: true,
+          includeDocs: true,
+          excludeRoutes: ['/admin/**'],
+
+          // Site metadata
+          siteTitle: 'My Documentation',
+          siteDescription: 'Comprehensive documentation for developers',
+
+          // Control heading levels based on route depth
+          autoSectionDepth: 1, // depth-1 routes get H2, depth-2 get H3, etc.
+
+          // Section organization
           sections: [
             {
               id: 'getting-started',
               name: 'Getting Started',
+              description: 'Quick start guides and tutorials',
               position: 1,
               routes: [{ route: '/docs/intro/**' }],
             },
             {
               id: 'api-reference',
               name: 'API Reference',
+              description: 'Complete API documentation',
               position: 2,
               routes: [{ route: '/docs/api/**' }],
-            },
-          ],
-          siteTitle: 'My Documentation',
-          siteDescription: 'Comprehensive documentation for developers',
-        },
-
-        // File attachments
-        processing: {
-          attachments: [
-            {
-              source: './api/openapi.yaml',
-              title: 'OpenAPI Specification',
-              sectionId: 'api-reference',
+              attachments: [
+                {
+                  source: './api/openapi.yaml',
+                  title: 'OpenAPI Specification',
+                  description: 'Complete API specification in OpenAPI 3.0 format',
+                },
+              ],
             },
           ],
         },
 
         // UI features (requires theme package)
         ui: {
-          copyPageContent: true,
+          copyPageContent: {
+            buttonLabel: 'Copy Page',
+            display: {
+              docs: true,
+              excludeRoutes: ['/admin/**'],
+            },
+          },
         },
       } satisfies PluginOptions,
     ],
@@ -178,268 +191,221 @@ export default config;
 
 ## API Reference
 
-### Main Configuration Options
+The plugin configuration is organized into three main areas: **markdown file generation**, **llms.txt index creation**, and **UI features**.
 
-| Property         | Type                                           | Required | Default  | Description                                                                                                                                                                                                                                            |
-| ---------------- | ---------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `generate`       | [`GenerateOptions`](#generateoptions)          | ❌       | `{}`     | Controls what output files are generated (markdown files, llms-full.txt) and how paths are formatted in the output.                                                                                                                                    |
-| `include`        | [`IncludeOptions`](#includeoptions)            | ❌       | `{}`     | Specifies which types of content from your Docusaurus site (docs, blog, pages) should be processed and included in the output.                                                                                                                         |
-| `structure`      | [`StructureOptions`](#structureoptions)        | ❌       | `{}`     | Defines how your documentation is organized into logical sections in the llms.txt output, including site metadata, section definitions, and optional links.                                                                                            |
-| `processing`     | [`ProcessingOptions`](#processingoptions)      | ❌       | `{}`     | Configuration for how HTML content is processed, including markdown conversion settings, content extraction rules, and attachment handling.                                                                                                            |
-| `ui`             | [`UiOptions`](#uioptions)                      | ❌       | `{}`     | Settings for UI features that integrate with your Docusaurus theme, such as the copy content button that appears on documentation pages.                                                                                                               |
-| `runOnPostBuild` | `boolean`                                      | ❌       | `true`   | Whether the plugin automatically runs during Docusaurus's postBuild lifecycle phase. Set to false if you want to manually trigger generation via the CLI command instead.                                                                              |
-| `onSectionError` | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How the plugin handles errors when processing section definitions (e.g., invalid section IDs, route conflicts). 'throw' stops the build with an error, 'warn' shows warnings in console, 'log' silently logs to debug, 'ignore' skips silently.        |
-| `onRouteError`   | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How the plugin handles errors when processing individual routes/pages (e.g., HTML parsing failures, missing content). Controls whether a single page failure should stop the entire build or just skip that page.                                      |
-| `logLevel`       | `0` \| `1` \| `2` \| `3`                       | ❌       | `1`      | Verbosity of console output during processing. 0 = silent (no output), 1 = normal (important messages only), 2 = verbose (detailed progress), 3 = debug (everything including cache operations). Higher levels help troubleshoot configuration issues. |
+### Top-Level Options
 
-### GenerateOptions
+These options control plugin behavior and error handling.
 
-Controls what files the plugin generates and how it formats output paths.
+| Property         | Type                                           | Required | Default  | Description                                                                                                                                                    |
+| ---------------- | ---------------------------------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `markdown`       | [`MarkdownOptions`](#markdownoptions)          | ❌       | `{}`     | Generate individual .md files for each page. See [MarkdownOptions](#markdownoptions) below.                                                                   |
+| `llmsTxt`        | [`LlmsTxtOptions`](#llmstxtoptions)            | ❌       | `{}`     | Generate llms.txt index file with organized content. See [LlmsTxtOptions](#llmstxtoptions) below.                                                             |
+| `ui`             | [`UiOptions`](#uioptions)                      | ❌       | `{}`     | Enable UI features like copy buttons. See [UiOptions](#uioptions) below.                                                                                      |
+| `runOnPostBuild` | `boolean`                                      | ❌       | `true`   | Automatically run during build. Set to `false` to manually trigger via CLI.                                                                                   |
+| `onSectionError` | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How to handle section configuration errors (invalid IDs, route conflicts).                                                                                     |
+| `onRouteError`   | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How to handle page processing errors (HTML parsing failures). `'warn'` skips failed pages and continues.                                                      |
+| `logLevel`       | `0` \| `1` \| `2` \| `3`                       | ❌       | `1`      | Console output verbosity. `0`=silent, `1`=normal, `2`=verbose, `3`=debug.                                                                                     |
 
-| Property              | Type      | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------- | --------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `enableMarkdownFiles` | `boolean` | ❌       | `true`  | When enabled, generates individual .md files for each processed page alongside the llms.txt index. These files contain the full markdown content of each page and are saved to the build directory. Useful for direct file access, git tracking of content changes, or when you want to serve markdown files directly.                                                                     |
-| `enableLlmsFullTxt`   | `boolean` | ❌       | `false` | Generates an additional llms-full.txt file that contains site title/description followed by organized sections with full content. Includes the complete processed markdown content of each document within their sections. Uses hierarchical organization without separate index/content sections.                                                                                         |
-| `relativePaths`       | `boolean` | ❌       | `true`  | Determines how paths are formatted in the llms.txt file. When true, uses relative paths (e.g., ./docs/intro.md) that work for local file access. When false, uses absolute URLs (e.g., https://yoursite.com/docs/intro) for web access. Relative paths are typically better for local development and testing, while absolute URLs are needed when the llms.txt will be fetched over HTTP. |
+---
 
-### IncludeOptions
+### MarkdownOptions
 
-Specifies which content types from your Docusaurus site should be processed and included in the
-generated output.
+Generate individual .md files for each page.
 
-| Property                | Type       | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------- | ---------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `includeBlog`           | `boolean`  | ❌       | `false` | When enabled, processes and includes all blog posts from your Docusaurus blog plugin in the generated llms.txt and markdown files. Blog posts are automatically organized into a 'Blog' section and sorted by date. Useful when your blog contains technical content, tutorials, or announcements that would be valuable for LLM consumption.                                      |
-| `includePages`          | `boolean`  | ❌       | `false` | When enabled, includes standalone pages (non-docs, non-blog pages) in the output. These are typically pages created in the `src/pages` directory like landing pages, about pages, or custom pages. Each page is processed and organized based on its URL structure.                                                                                                                |
-| `includeDocs`           | `boolean`  | ❌       | `true`  | Controls whether documentation pages (from the docs plugin/directory) are processed and included. You might set this to false if you only want to generate llms.txt for your blog content, or if you're selectively processing specific doc versions.                                                                                                                              |
-| `includeVersionedDocs`  | `boolean`  | ❌       | `true`  | When your documentation uses Docusaurus versioning, this controls whether older versions are included in the output. Set to false to only process the current/latest version, significantly reducing output size for sites with many versions. Each version appears as a separate section in the output.                                                                           |
-| `includeGeneratedIndex` | `boolean`  | ❌       | `true`  | Includes auto-generated category index pages that Docusaurus creates for sidebar categories with `link.type: 'generated-index'`. These pages provide useful navigation context and overview information that helps LLMs understand the structure of your documentation.                                                                                                            |
-| `excludeRoutes`         | `string[]` | ❌       | `[]`    | Array of glob patterns for routes to exclude from processing, regardless of other include settings. Patterns are matched against the page route (not the file path). Useful for excluding admin pages, test pages, drafts, or pages with sensitive content. Example: `['/admin/**', '/**/test-*', '/docs/internal/**']`. Excluded routes are completely skipped during processing. |
+| Property                     | Type                        | Required | Default                                                                                              | Description                                                                                       |
+| ---------------------------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `enableFiles`                | `boolean`                   | ❌       | `true`                                                                                               | Generate .md files. Disable to skip file generation entirely.                                        |
+| `relativePaths`              | `boolean`                   | ❌       | `true`                                                                                               | Use relative paths (`./docs/intro.md`) vs absolute URLs (`https://site.com/docs/intro`).         |
+| `includeDocs`                | `boolean`                   | ❌       | `true`                                                                                               | Include documentation pages.                                                                          |
+| `includeVersionedDocs`       | `boolean`                   | ❌       | `true`                                                                                               | Include older doc versions. Disable to only process current version.                                 |
+| `includeBlog`                | `boolean`                   | ❌       | `false`                                                                                              | Include blog posts.                                                                                   |
+| `includePages`               | `boolean`                   | ❌       | `false`                                                                                              | Include standalone pages from `src/pages/`.                                                           |
+| `includeGeneratedIndex`      | `boolean`                   | ❌       | `true`                                                                                               | Include auto-generated category index pages.                                                          |
+| `excludeRoutes`              | `string[]`                  | ❌       | `[]`                                                                                                 | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                   |
+| `contentSelectors`           | `string[]`                  | ❌       | `['.theme-doc-markdown', 'main .container .col', 'main .theme-doc-wrapper', 'article', 'main']`     | CSS selectors to find main content. First match wins.                                            |
+| `routeRules`                 | [`RouteRule[]`](#routerule) | ❌       | `[]`                                                                                                 | Override selectors for specific routes. See [RouteRule](#routerule).                             |
+| `remarkStringify`            | `object`                    | ❌       | `{}`                                                                                                 | Markdown formatting options. See [remark-stringify](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify#options). |
+| `remarkGfm`                  | `boolean \| object`         | ❌       | `true`                                                                                               | Enable GitHub Flavored Markdown (tables, strikethrough, task lists).                                  |
+| `rehypeProcessTables`        | `boolean`                   | ❌       | `true`                                                                                               | Convert HTML tables to markdown. Disable for complex tables.                                          |
+| `beforeDefaultRehypePlugins` | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom rehype plugins to run BEFORE defaults.                                                 |
+| `rehypePlugins`              | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom rehype plugins that REPLACE defaults. Use with caution.                                             |
+| `beforeDefaultRemarkPlugins` | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom remark plugins to run BEFORE defaults.                                             |
+| `remarkPlugins`              | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom remark plugins that REPLACE defaults. Use with caution.                                         |
 
-### StructureOptions
+---
 
-Defines how your content is organized into logical sections in the llms.txt output, along with site
-metadata.
+### LlmsTxtOptions
 
-| Property             | Type                                        | Required | Default     | Description                                                                                                                                                                                                                                                                                                                                                                       |
-| -------------------- | ------------------------------------------- | -------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `siteTitle`          | `string`                                    | ❌       | `undefined` | The title displayed in the llms.txt file header. This helps LLMs understand what documentation they're reading. Can be set to an empty string to omit the title entirely. If not specified, uses the site title from Docusaurus config.                                                                                                                                           |
-| `siteDescription`    | `string`                                    | ❌       | `undefined` | A brief description of your documentation site that appears in the llms.txt header, providing context to LLMs about the content's purpose, scope, and target audience. Can be set to an empty string to omit the description.                                                                                                                                                     |
-| `enableDescriptions` | `boolean`                                   | ❌       | `true`      | When enabled, includes page descriptions and section descriptions throughout the generated llms.txt file, providing richer context for each link. Disable to create a more compact index without descriptions.                                                                                                                                                                    |
-| `sections`           | [`SectionDefinition[]`](#sectiondefinition) | ❌       | `[]`        | Array of section definitions that organize your content into logical groups in the llms.txt output. Each section becomes a heading with its pages listed below. Without sections, content is auto-organized by URL structure (e.g., /api/\* becomes 'Api' section). Sections provide better control over organization, custom ordering, and can include descriptions for context. |
-| `optionalLinks`      | [`OptionalLink[]`](#optionallink)           | ❌       | `[]`        | External URLs to include in the llms.txt file, useful for linking to external documentation, APIs, or resources that complement your docs but aren't part of your Docusaurus site. These links appear in an 'Optional' section at the end of llms.txt.                                                                                                                            |
+Generate and configure the llms.txt index file.
 
-### ProcessingOptions
+| Property                | Type                                        | Required | Default | Description                                                                                           |
+| ----------------------- | ------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `enableLlmsFullTxt`     | `boolean`                                   | ❌       | `false` | Generate llms-full.txt with complete page content (not just links).                                  |
+| `includeDocs`           | `boolean`                                   | ❌       | `true`  | Include documentation pages.                                                                          |
+| `includeVersionedDocs`  | `boolean`                                   | ❌       | `false` | ⚠️ Include older doc versions. **Default is `false`** (different from markdown).                     |
+| `includeBlog`           | `boolean`                                   | ❌       | `false` | Include blog posts.                                                                                   |
+| `includePages`          | `boolean`                                   | ❌       | `false` | Include standalone pages from `src/pages/`.                                                           |
+| `includeGeneratedIndex` | `boolean`                                   | ❌       | `true`  | Include auto-generated category index pages.                                                          |
+| `excludeRoutes`         | `string[]`                                  | ❌       | `[]`    | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                   |
+| `sections`              | [`SectionDefinition[]`](#sectiondefinition) | ❌       | `[]`    | Organize content into named sections. See [SectionDefinition](#sectiondefinition).                    |
+| `autoSectionDepth`      | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                | ❌       | `1`     | Heading offset: `1`=routes use H2/H3/H4, `2`=routes use H3/H4/H5.                                    |
+| `autoSectionPosition`   | `number`                                    | ❌       | `undefined` | Position for auto-generated sections. `undefined`=after positioned sections, number=sort with positioned sections. |
+| `siteTitle`             | `string`                                    | ❌       | `''`    | Title for llms.txt header. Falls back to Docusaurus config if not set.                               |
+| `siteDescription`       | `string`                                    | ❌       | `''`    | Description for llms.txt header.                                                                      |
+| `enableDescriptions`    | `boolean`                                   | ❌       | `true`  | Include page and section descriptions. Disable for a more compact index.                              |
+| `attachments`           | [`AttachmentFile[]`](#attachmentfile)       | ❌       | `[]`    | Include files like OpenAPI specs, schemas. Appear in 'Attachments' section.                          |
+| `optionalLinks`         | [`OptionalLink[]`](#optionallink)           | ❌       | `[]`    | External links (APIs, forums). Appear in 'Optional' section.                                         |
 
-Controls how HTML content is extracted and converted to markdown, plus additional content processing
-features.
-
-| Property                     | Type                                  | Required | Default                                                                                                            | Description                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ---------------------------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `routeRules`                 | [`RouteRule[]`](#routerule)           | ❌       | `[]`                                                                                                               | Global rules for customizing content extraction for specific routes. **Use this for processing customization, not section assignment.** These rules can override content extraction selectors or modify processing behavior for groups of pages. Rules are applied in order and the first matching rule wins. Useful for handling special page types or applying consistent processing to page groups.      |
-| `contentSelectors`           | `string[]`                            | ❌       | `['.theme-doc-markdown', 'main .container .col', 'main .theme-doc-wrapper', 'article', 'main .container', 'main']` | CSS selectors that identify the main content area in your HTML pages. The plugin extracts and converts content only from elements matching these selectors. Default selectors handle standard Docusaurus themes. Override when using custom themes or when you need to extract specific page sections.                                                                                                      |
-| `attachments`                | [`AttachmentFile[]`](#attachmentfile) | ❌       | `[]`                                                                                                               | Local files to include in the output alongside your documentation. Supports text files like OpenAPI specs, JSON schemas, configuration files, or markdown guides. Files are read, optionally formatted, and can be assigned to specific sections. The content is included in both llms.txt (as links) and optionally in llms-full.txt (full content).                                                       |
-| `remarkStringify`            | `RemarkStringifyOptions`              | ❌       | `{}`                                                                                                               | Configuration options for how markdown is formatted in the output. Controls aspects like bullet markers (-, _, +), emphasis markers (_, \_), code fence style, line width, and other markdown formatting preferences. Uses [remark-stringify options](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify#options).                                                                      |
-| `remarkGfm`                  | `boolean` \| `RemarkGfmOptions`       | ❌       | `true`                                                                                                             | Enables GitHub Flavored Markdown features including tables, strikethrough, task lists, and literal URLs. When true, uses default GFM settings. Can be configured with specific options like `{singleTilde: false}` to customize strikethrough behavior. Set to false only if your content doesn't use GFM features.                                                                                         |
-| `rehypeProcessTables`        | `boolean`                             | ❌       | `true`                                                                                                             | When enabled, HTML tables are converted to markdown table format for better readability in markdown files. When disabled, table HTML is preserved as-is in the output. Disable if you have complex tables that don't convert well to markdown or if you prefer to preserve exact HTML structure.                                                                                                            |
-| `beforeDefaultRehypePlugins` | `PluginInput[]`                       | ❌       | `[]`                                                                                                               | Custom rehype plugins to run BEFORE the default HTML processing pipeline. Use for preprocessing HTML, adding custom attributes, or modifying HTML structure before conversion. Plugins receive the HTML AST and can transform it. Format: `[plugin]` or `[plugin, options]` or `[plugin, options, settings]` following unified.js conventions. Advanced feature for extending HTML processing capabilities. |
-| `rehypePlugins`              | `PluginInput[]`                       | ❌       | `[]`                                                                                                               | Custom rehype plugins that REPLACE the entire default HTML processing pipeline. Use with caution as it overrides all built-in HTML processing including table conversion and link processing. Format: `[plugin]` or `[plugin, options]` or `[plugin, options, settings]` following unified.js conventions. Only use when you need complete control over HTML transformation.                                |
-| `beforeDefaultRemarkPlugins` | `PluginInput[]`                       | ❌       | `[]`                                                                                                               | Custom remark plugins to run BEFORE the default markdown processing pipeline. Use for adding custom markdown transformations, syntax extensions, or preprocessing markdown before final formatting. Format: `[plugin]` or `[plugin, options]` or `[plugin, options, settings]` following unified.js conventions. Plugins work with the markdown AST.                                                        |
-| `remarkPlugins`              | `PluginInput[]`                       | ❌       | `[]`                                                                                                               | Custom remark plugins that REPLACE the entire default markdown processing pipeline. Overrides all built-in markdown processing including GFM support and formatting. Format: `[plugin]` or `[plugin, options]` or `[plugin, options, settings]` following unified.js conventions. Only use when you need complete control over markdown transformation.                                                     |
+---
 
 ### UiOptions
 
-Settings for UI features that integrate with your Docusaurus theme.
+Enable UI features on your documentation pages.
 
-| Property          | Type                                                             | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ----------------- | ---------------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `copyPageContent` | `boolean` \| [`CopyPageContentOptions`](#copypagecontentoptions) | ❌       | `false` | Enables a copy button on each documentation page that allows users to copy the page content in various formats or open AI interfaces with the page URL. When true, uses default settings with all formats enabled. When configured as an object, allows customization of button text and available actions. The button integrates seamlessly with Docusaurus themes and appears in the doc page header. See [Copy Page Content Feature](./docs/features/copy-page-content.md) for setup details and current limitations. |
+| Property          | Type                                                                  | Required | Default | Description                                                                                                     |
+| ----------------- | --------------------------------------------------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `copyPageContent` | `boolean \| ` [`CopyPageContentOptions`](#copypagecontentoptions)     | ❌       | `false` | Add copy button to doc pages. Use `true` for defaults or object for customization. **Requires theme package.** |
 
-### Complex Types
+---
+
+### Complex Types Reference
+
+These types are used in the configuration options above.
 
 #### SectionDefinition
 
-Defines a logical section in your documentation for organizing content in llms.txt.
+Organize content into logical sections in llms.txt.
 
-| Property      | Type                              | Required | Default     | Description                                                                                                                                                                                                                                                                                                                            |
-| ------------- | --------------------------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`          | `string`                          | ✅       | -           | Unique identifier for the section in kebab-case format (e.g., 'api-reference', 'getting-started'). Must match pattern `/^[a-z0-9-]+$/` (lowercase letters, numbers, and hyphens only). This ID is used internally for routing, attachment assignment, and link organization. Must be unique across all sections including subsections. |
-| `name`        | `string`                          | ✅       | -           | Display name shown as the section heading in llms.txt (e.g., 'API Reference', 'Getting Started'). This is what LLMs and users will see as the section title. Can contain spaces and special characters.                                                                                                                                |
-| `description` | `string`                          | ❌       | `undefined` | Optional description that appears under the section heading in the llms.txt output, providing context about what content is in this section. Formatted as a blockquote (with >) to distinguish it from regular content. Helps LLMs understand the purpose and scope of the section.                                                    |
-| `position`    | `number`                          | ❌       | `undefined` | Controls the sort order of sections in the output. Lower numbers appear first (position 1 comes before position 2). Sections without a position are sorted alphabetically after all positioned sections. Useful for ensuring important sections like 'Getting Started' appear at the top.                                              |
-| `routes`      | [`SectionRoute[]`](#sectionroute) | ❌       | `[]`        | Array of route patterns that determine which pages belong to this section. Uses glob patterns like '/api/\*\*' to match multiple routes. Pages matching these routes are assigned to this section, overriding the default URL-based auto-assignment. First matching section wins when routes overlap.                                  |
-| `subsections` | `SectionDefinition[]`             | ❌       | `[]`        | Nested sections that appear as subsections in the output hierarchy. Useful for creating multi-level organization like API > Authentication > OAuth. Subsections inherit context from parent sections and can have their own routes and descriptions. Maximum recommended nesting is 3 levels for readability.                          |
+```typescript
+{
+  id: 'api-docs',                    // Unique kebab-case ID
+  name: 'API Documentation',         // Display name
+  description: 'Complete API docs',  // Optional context
+  position: 1,                       // Sort order (lower = earlier)
+  routes: [{ route: '/api/**' }],    // Which pages belong here
+  subsections: [],                   // Nested sections
+  attachments: [],                   // Section-specific files
+  optionalLinks: []                  // Section-specific external links
+}
+```
+
+| Property        | Type                              | Required | Description                                                                                            |
+| --------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `id`            | `string`                          | ✅       | Unique identifier (lowercase, numbers, hyphens only). Must be unique across all sections.             |
+| `name`          | `string`                          | ✅       | Display name shown in llms.txt.                                                                        |
+| `description`   | `string`                          | ❌       | Optional description shown under heading.                                                              |
+| `position`      | `number`                          | ❌       | Sort order. Lower numbers appear first.                                                                |
+| `routes`        | [`SectionRoute[]`](#sectionroute) | ❌       | Glob patterns to match pages to this section.                                                          |
+| `subsections`   | `SectionDefinition[]`             | ❌       | Nested sections (max 3 levels recommended).                                                            |
+| `attachments`   | [`AttachmentFile[]`](#attachmentfile) | ❌       | Files specific to this section.                                                                        |
+| `optionalLinks` | [`OptionalLink[]`](#optionallink)     | ❌       | External links specific to this section.                                                               |
 
 #### SectionRoute
 
-Configuration for route patterns within a section definition. **Use this to assign specific routes
-to sections.**
+Assign routes to sections using glob patterns.
 
-| Property           | Type       | Required | Default     | Description                                                                                                                                                                                                                                                                                                       |
-| ------------------ | ---------- | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `route`            | `string`   | ✅       | -           | Glob pattern that matches page routes to include in this section (e.g., '/api/**', '/docs/advanced/_'). The pattern is matched against the page's URL path, not the file system path. Supports standard glob syntax including _ (single level) and ** (multiple levels). **Primary purpose: Section assignment.** |
-| `contentSelectors` | `string[]` | ❌       | `undefined` | Optional CSS selectors that override the global content extraction selectors for pages matching this route. Useful when certain pages in a section have different HTML structure. Example: `['.api-docs-content', 'article.api']` for API documentation with custom layout.                                       |
+```typescript
+{
+  route: '/api/**',                  // Match all /api/* routes
+  contentSelectors: ['.api-content'] // Optional: custom selectors for these pages
+}
+```
+
+| Property           | Type       | Required | Description                                                                                            |
+| ------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `route`            | `string`   | ✅       | Glob pattern (`*` = single level, `**` = multiple levels).                                            |
+| `contentSelectors` | `string[]` | ❌       | Override content extraction for these routes.                                                          |
 
 #### RouteRule
 
-Global rules for customizing content extraction for specific routes. **Use this for processing
-customization, not section assignment.**
+Customize content extraction for specific routes (separate from section assignment).
 
-| Property           | Type       | Required | Default     | Description                                                                                                                                                                                                                                                                                             |
-| ------------------ | ---------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `route`            | `string`   | ✅       | -           | Glob pattern that matches page routes this rule applies to (e.g., '/api/**', '/blog/2024/**'). All pages matching this pattern will have this rule's content extraction settings applied. Pattern matching happens during HTML processing. **Primary purpose: Content extraction customization.**       |
-| `contentSelectors` | `string[]` | ❌       | `undefined` | Custom CSS selectors for extracting content from pages matching this route pattern. Overrides the global contentSelectors setting. Use when specific pages or page groups have different HTML structure or need special content extraction logic. **Note: RouteRules do NOT assign pages to sections.** |
+```typescript
+{
+  route: '/api/**',
+  contentSelectors: ['.api-content', 'article']
+}
+```
+
+| Property           | Type       | Required | Description                                                                                            |
+| ------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `route`            | `string`   | ✅       | Glob pattern matching routes.                                                                          |
+| `contentSelectors` | `string[]` | ❌       | CSS selectors for content extraction.                                                                  |
+
+**Note:** Use `RouteRule` (in `markdown.routeRules`) for processing customization. Use `SectionRoute` (in `sections[].routes`) for section assignment.
 
 #### AttachmentFile
 
-Configuration for including external files in the llms.txt output.
+Include external text files in your output.
 
-| Property           | Type      | Required | Default     | Description                                                                                                                                                                                                                                                                                |
-| ------------------ | --------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `source`           | `string`  | ✅       | -           | Path to the local file to include, relative to your Docusaurus site directory (e.g., './specs/openapi.yaml', './schemas/config.json'). The file must exist at build time. Supports any text-based file format. Binary files are not supported.                                             |
-| `title`            | `string`  | ✅       | -           | Display title for the attachment shown in llms.txt. This becomes the link text that LLMs will see (e.g., 'OpenAPI Specification', 'Database Schema'). Should be descriptive enough to indicate the file's purpose without needing to read it.                                              |
-| `description`      | `string`  | ❌       | `undefined` | Optional description providing additional context about the attachment's purpose, format, or usage. Appears as indented text under the title in llms.txt. Helps LLMs understand when and why they might need to reference this file.                                                       |
-| `sectionId`        | `string`  | ❌       | `undefined` | ID of the section where this attachment should appear. Must match pattern `/^[a-z0-9-]+$/` if specified. If specified, the attachment is placed within that section's content. If not specified, attachments appear in a dedicated 'Attachments' section or follow URL-based organization. |
-| `includeInFullTxt` | `boolean` | ❌       | `true`      | Whether to include the full content of this attachment in the llms-full.txt file. Set to false for very large files that might bloat the output or for files that are better accessed separately. The attachment link always appears in llms.txt regardless of this setting.               |
+```typescript
+{
+  source: './specs/openapi.yaml',
+  title: 'API Specification',
+  description: 'Complete OpenAPI 3.0 spec',
+  includeInFullTxt: true
+}
+```
+
+| Property           | Type      | Default | Description                                                                                            |
+| ------------------ | --------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| `source`           | `string`  | -       | File path relative to site root.                                                                       |
+| `title`            | `string`  | -       | Display name in llms.txt.                                                                              |
+| `description`      | `string`  | -       | Optional context about the file.                                                                       |
+| `includeInFullTxt` | `boolean` | `true`  | Include full content in llms-full.txt.                                                                 |
 
 #### OptionalLink
 
-External URLs to include in the llms.txt index for referencing external resources.
+Link to external resources.
 
-| Property      | Type     | Required | Default     | Description                                                                                                                                                                                                                                                   |
-| ------------- | -------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`       | `string` | ✅       | -           | Display text for the link in llms.txt. This is what LLMs and users will see as the clickable/referenced text. Should clearly indicate what resource the link points to (e.g., 'React Documentation', 'API Status Page').                                      |
-| `url`         | `string` | ✅       | -           | The complete external URL to link to (e.g., 'https://reactjs.org/docs'). Must be a valid HTTP or HTTPS URL. The plugin doesn't validate that the URL is reachable, only that it's properly formatted.                                                         |
-| `description` | `string` | ❌       | `undefined` | Optional description that provides context about what's at this URL and why it's relevant. Appears as indented text under the link in the llms.txt output. Helps LLMs understand whether to reference this external resource for specific types of questions. |
+```typescript
+{
+  title: 'API Status Page',
+  url: 'https://status.example.com',
+  description: 'Real-time API status'
+}
+```
+
+| Property      | Type     | Required | Description                                                                                            |
+| ------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `title`       | `string` | ✅       | Link text shown in llms.txt.                                                                           |
+| `url`         | `string` | ✅       | External URL (must be HTTP/HTTPS).                                                                     |
+| `description` | `string` | ❌       | Optional context about the link.                                                                       |
 
 #### CopyPageContentOptions
 
-Configuration for the copy page content button feature when using object configuration.
-
-| Property                    | Type                  | Required | Default                         | Description                                                                                                                                                                                                              |
-| --------------------------- | --------------------- | -------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `buttonLabel`               | `string`              | ❌       | `'Copy Page'`                   | Custom label text for the copy button that appears in the doc header. Keep it short as it appears alongside a dropdown arrow. Examples: 'Copy Page', 'Export', 'Share'.                                                  |
-| `actions`                   | `object`              | ❌       | See below                       | Configuration for available copy and share actions in the dropdown menu.                                                                                                                                                 |
-| `actions.markdown`          | `boolean`             | ❌       | `true`                          | Whether to include the "Copy as Markdown" option in the dropdown menu. When selected, copies the page content in clean markdown format, useful for pasting into markdown editors, GitHub issues, or documentation tools. |
-| `actions.ai`                | `object`              | ❌       | See below                       | Configuration for AI integration options in the dropdown menu.                                                                                                                                                           |
-| `actions.ai.chatGPT`        | `boolean` \| `object` | ❌       | `true`                          | ChatGPT integration. When `true`, uses default prompt. When an object, can specify custom `prompt` string. Opens ChatGPT web interface with the documentation URL and prompt.                                            |
-| `actions.ai.chatGPT.prompt` | `string`              | ❌       | `'Analyze this documentation:'` | Custom prompt text to include when opening ChatGPT. Only used when `chatGPT` is configured as an object. The documentation URL is automatically appended after the prompt.                                               |
-| `actions.ai.claude`         | `boolean` \| `object` | ❌       | `true`                          | Claude integration. When `true`, uses default prompt. When an object, can specify custom `prompt` string. Opens Claude web interface with the documentation URL and prompt.                                              |
-| `actions.ai.claude.prompt`  | `string`              | ❌       | `'Analyze this documentation:'` | Custom prompt text to include when opening Claude. Only used when `claude` is configured as an object. The documentation URL is automatically appended after the prompt.                                                 |
-
-## Troubleshooting
-
-### Common Issues
-
-**"No cached routes found"** - Run `npm run build` first; the plugin needs route cache from build
-**Empty or minimal content** - Check `contentSelectors` match your theme; use `logLevel: 3` for
-debugging **Sections not organizing correctly** - Verify route patterns don't overlap; first
-matching section wins **Missing pages** - Check `excludeRoutes` patterns and ensure correct
-`include` options are set **Build performance issues** - Use `excludeRoutes` to skip large sections;
-disable `enableLlmsFullTxt` if not needed
-
-## Advanced Usage
-
-### Custom Remark/Rehype Plugins
+Configure the copy button feature (requires theme package).
 
 ```typescript
-import remarkCustomPlugin from './my-remark-plugin';
-
-const pluginConfig: PluginOptions = {
-  processing: {
-    beforeDefaultRemarkPlugins: [[remarkCustomPlugin, { option: 'value' }]],
+{
+  buttonLabel: 'Copy Page',
+  display: {
+    docs: true,
+    excludeRoutes: ['/admin/**']
   },
-};
+  contentStrategy: 'prefer-markdown',
+  actions: {
+    viewMarkdown: true,
+    ai: {
+      chatGPT: true,
+      claude: { prompt: 'Help me understand this:' }
+    }
+  }
+}
 ```
 
-### Section Hierarchies
-
-```typescript
-import type { PluginOptions } from '@signalwire/docusaurus-plugin-llms-txt/public';
-
-const pluginConfig: PluginOptions = {
-  structure: {
-    sections: [
-      {
-        id: 'api',
-        name: 'API Reference',
-        subsections: [
-          { id: 'rest', name: 'REST API', routes: [{ route: '/api/rest/**' }] },
-          { id: 'graphql', name: 'GraphQL', routes: [{ route: '/api/graphql/**' }] },
-        ],
-      },
-    ],
-  },
-};
-```
-
-### Performance Optimization
-
-- Use `excludeRoutes` to skip unnecessary pages
-- Set `includeVersionedDocs: false` to process only current version
-- Enable `logLevel: 0` for production builds to reduce console output
-- Use route-specific `contentSelectors` for pages with different structures
-
-## CLI Commands
-
-### Generate Command
-
-```bash
-npx docusaurus llms-txt [siteDir]
-```
-
-Generates `llms.txt` and markdown files using cached routes from a previous build.
-
-**Prerequisites:** You must run `npm run build` first to create the route cache.
-
-### Clean Command
-
-```bash
-npx docusaurus llms-txt-clean [siteDir] [options]
-```
-
-Removes all generated files:
-
-- Deletes `build/llms.txt`, `build/llms-full.txt`, and all generated markdown files
-- Use `--clear-cache` to also clear the `.docusaurus/llms-txt-plugin` cache directory
-- Useful for forcing full regeneration or cleaning up after plugin removal
-
-## Copy Page Content Feature
-
-Add a copy button to your documentation pages with AI integration:
-
-```bash
-# Install both packages
-npm install @signalwire/docusaurus-plugin-llms-txt @signalwire/docusaurus-theme-llms-txt
-```
-
-```typescript
-import type { Config } from '@docusaurus/types';
-import type { PluginOptions } from '@signalwire/docusaurus-plugin-llms-txt/public';
-
-const config: Config = {
-  themes: ['@signalwire/docusaurus-theme-llms-txt'],
-  plugins: [
-    [
-      '@signalwire/docusaurus-plugin-llms-txt',
-      {
-        ui: {
-          copyPageContent: true, // Enable with defaults
-        },
-      } satisfies PluginOptions,
-    ],
-  ],
-};
-
-export default config;
-```
-
-**Important Notes:**
-
-- Currently only supports documentation pages (not blog or custom pages)
-- Requires both the plugin AND theme package to be installed
-- Button appears in the doc page header with dropdown for multiple actions
-
-## License
+| Property                    | Type                                   | Required | Default             | Description                                                                                            |
+| --------------------------- | -------------------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `buttonLabel`               | `string`                               | ❌       | `'Copy Page'`       | Button text.                                                                                           |
+| `display`                   | `object`                               | ❌       | `{}`                | Control where button appears.                                                                          |
+| `display.docs`              | `boolean`                              | ❌       | `true`              | Show on docs pages.                                                                                    |
+| `display.excludeRoutes`     | `string[]`                             | ❌       | `[]`                | Hide on specific routes (glob patterns).                                                               |
+| `contentStrategy`           | `'prefer-markdown' \| 'html-only'`     | ❌       | `'prefer-markdown'` | What content to copy.                                                                                  |
+| `actions`                   | `object`                               | ❌       | `{}`                | Available actions in dropdown.                                                                         |
+| `actions.viewMarkdown`      | `boolean`                              | ❌       | `true`              | Show "View Markdown" option.                                                                           |
+| `actions.ai`                | `object`                               | ❌       | `{}`                | AI integration options.                                                                                |
+| `actions.ai.chatGPT`        | `boolean \| { prompt?: string }`       | ❌       | `true`              | ChatGPT integration. Default prompt: "Analyze this documentation:"                                     |
+| `actions.ai.claude`         | `boolean \| { prompt?: string }`       | ❌       | `true`              | Claude integration. Default prompt: "Analyze this documentation:"                                      |
 
 MIT © [SignalWire](https://github.com/signalwire)

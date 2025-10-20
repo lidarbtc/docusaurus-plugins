@@ -106,7 +106,8 @@ export async function orchestrateProcessing(
     siteConfig,
     directories,
     logger,
-    processedAttachments // Pass attachments for integration into tree
+    processedAttachments, // Pass attachments for integration into tree
+    finalCache // Pass cache for indexing filtering
   );
 
   return {

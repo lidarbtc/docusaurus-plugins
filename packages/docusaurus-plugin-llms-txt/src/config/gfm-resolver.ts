@@ -7,58 +7,58 @@
 
 import { DEFAULT_GFM } from '../constants';
 
-import type { PluginOptions, ProcessingOptions } from '../types';
+import type { PluginOptions, MarkdownOptions } from '../types';
 
 /**
  * Resolve GFM configuration with defaults
  */
 export function resolveGfmConfig(
-  processing: ProcessingOptions
-): ProcessingOptions {
-  if (!processing.remarkGfm) {
-    return processing;
+  markdown: MarkdownOptions
+): MarkdownOptions {
+  if (!markdown.remarkGfm) {
+    return markdown;
   }
 
-  if (processing.remarkGfm === true) {
+  if (markdown.remarkGfm === true) {
     return {
-      ...processing,
+      ...markdown,
       remarkGfm: DEFAULT_GFM,
     };
   }
 
-  if (typeof processing.remarkGfm === 'object') {
+  if (typeof markdown.remarkGfm === 'object') {
     return {
-      ...processing,
+      ...markdown,
       remarkGfm: {
         ...DEFAULT_GFM,
-        ...processing.remarkGfm,
+        ...markdown.remarkGfm,
       },
     };
   }
 
-  return processing;
+  return markdown;
 }
 
 /**
  * Apply GFM configuration to plugin options
  */
 export function applyGfmConfiguration(options: PluginOptions): PluginOptions {
-  const processing = options.processing ?? {};
+  const markdown = options.markdown ?? {};
 
   if (
     !(
-      processing.remarkGfm === true ||
-      (typeof processing.remarkGfm === 'object' &&
-        processing.remarkGfm !== null)
+      markdown.remarkGfm === true ||
+      (typeof markdown.remarkGfm === 'object' &&
+        markdown.remarkGfm !== null)
     )
   ) {
     return options;
   }
 
-  const resolvedProcessing = resolveGfmConfig(processing);
+  const resolvedMarkdown = resolveGfmConfig(markdown);
 
   return {
     ...options,
-    processing: resolvedProcessing,
+    markdown: resolvedMarkdown,
   };
 }

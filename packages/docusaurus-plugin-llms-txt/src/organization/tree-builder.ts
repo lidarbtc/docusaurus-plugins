@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { getEffectiveConfigForRoute, getStructureConfig } from '../config';
+import { getEffectiveConfigForRoute, getLlmsTxtConfig } from '../config';
 import { findQualityIssues } from '../config/section-validator';
 import { TREE_ROOT_NAME, INDEX_IDENTIFIER } from '../constants';
 import { handleSectionError } from '../errors/section-errors';
@@ -28,10 +28,10 @@ export function buildDocumentTree(
   logger?: Logger
 ): TreeNode {
   // Get configuration groups
-  const structureConfig = getStructureConfig(globalConfig);
+  const llmsTxtConfig = getLlmsTxtConfig(globalConfig);
 
   // 1. Create section definitions map for quick lookup
-  const sectionsMap = buildSectionsMap(structureConfig.sections);
+  const sectionsMap = buildSectionsMap(llmsTxtConfig.sections);
 
   // 2. Group documents by section (auto-assign if not specified)
   const sectionGroups = new Map<string, DocInfo[]>();
@@ -64,7 +64,8 @@ export function buildDocumentTree(
 
   for (const [sectionId, sectionDocs] of sectionGroups) {
     const sectionDef =
-      sectionsMap.get(sectionId) || createAutoSection(sectionId);
+      sectionsMap.get(sectionId) ||
+      createAutoSection(sectionId, llmsTxtConfig.autoSectionPosition);
     const processedSection = createProcessedSection(sectionDef, sectionDocs);
     processedSections.set(sectionId, processedSection);
   }
@@ -72,7 +73,7 @@ export function buildDocumentTree(
   // 4. Handle quality issues (empty sections, etc.)
   if (logger) {
     const qualityIssues = findQualityIssues(
-      structureConfig.sections,
+      llmsTxtConfig.sections,
       processedSections,
       globalConfig.onSectionError || 'warn'
     );
@@ -153,7 +154,10 @@ function buildSectionsMap(
 /**
  * Create auto-generated section definition
  */
-function createAutoSection(sectionId: string): SectionDefinition {
+function createAutoSection(
+  sectionId: string,
+  position?: number
+): SectionDefinition {
   // Auto-create section with ID as name (title-cased)
   const name = sectionId
     .split('-')
@@ -163,6 +167,7 @@ function createAutoSection(sectionId: string): SectionDefinition {
   return {
     id: sectionId,
     name,
+    ...(position !== undefined && { position }),
   };
 }
 
@@ -215,13 +220,13 @@ function buildHierarchicalTree(
   globalConfig: PluginOptions
 ): TreeNode {
   // Get structure configuration
-  const structureConfig = getStructureConfig(globalConfig);
+  const llmsTxtConfig = getLlmsTxtConfig(globalConfig);
 
   // Create root node
   const root: TreeNode = {
     id: 'root',
-    name: structureConfig.siteTitle || TREE_ROOT_NAME,
-    description: structureConfig.siteDescription || '',
+    name: llmsTxtConfig.siteTitle || TREE_ROOT_NAME,
+    description: llmsTxtConfig.siteDescription || '',
     relPath: '',
     docs: [],
     subCategories: [],

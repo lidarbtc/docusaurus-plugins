@@ -11,7 +11,12 @@ import type { CopyPageContentOptions } from '../types/copyButton';
 // Resolved configuration type
 export interface ResolvedCopyPageContentOptions {
   buttonLabel: string;
-  markdown: boolean;
+  display: {
+    docs: boolean;
+    excludeRoutes: readonly string[];
+  };
+  contentStrategy: 'prefer-markdown' | 'html-only';
+  viewMarkdown: boolean;
   chatGPT: { enabled: boolean; prompt: string };
   claude: { enabled: boolean; prompt: string };
 }
@@ -19,7 +24,12 @@ export interface ResolvedCopyPageContentOptions {
 // Default configuration
 const DEFAULT_CONFIG: ResolvedCopyPageContentOptions = {
   buttonLabel: 'Copy Page',
-  markdown: true,
+  display: {
+    docs: true,
+    excludeRoutes: [],
+  },
+  contentStrategy: 'prefer-markdown',
+  viewMarkdown: true,
   chatGPT: {
     enabled: true,
     prompt: 'Analyze this documentation:',
@@ -44,7 +54,12 @@ export default function useCopyButtonConfig(
     if (pluginConfig && typeof pluginConfig === 'object') {
       baseConfig = {
         buttonLabel: pluginConfig.buttonLabel ?? baseConfig.buttonLabel,
-        markdown: pluginConfig.actions?.markdown ?? baseConfig.markdown,
+        display: {
+          docs: pluginConfig.display?.docs ?? baseConfig.display.docs,
+          excludeRoutes: pluginConfig.display?.excludeRoutes ?? baseConfig.display.excludeRoutes,
+        },
+        contentStrategy: pluginConfig.contentStrategy ?? baseConfig.contentStrategy,
+        viewMarkdown: pluginConfig.actions?.viewMarkdown ?? baseConfig.viewMarkdown,
         chatGPT: {
           enabled: (() => {
             if (typeof pluginConfig.actions?.ai?.chatGPT === 'boolean') {

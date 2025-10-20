@@ -135,7 +135,7 @@ export interface ProcessingResult {
 export interface RehypeLinksOptions {
   readonly baseUrl?: string;
   readonly relativePaths?: boolean;
-  readonly enableMarkdownFiles?: boolean;
+  readonly enableFiles?: boolean;
   readonly excludeRoutes?: readonly string[];
   readonly fullConfig?: PluginOptions;
   readonly routeLookup?: Map<string, CachedRouteInfo>;
@@ -148,7 +148,7 @@ export interface MarkdownConversionOptions {
   readonly contentSelectors?: readonly string[];
   readonly relativePaths?: boolean;
   readonly baseUrl?: string;
-  readonly enableMarkdownFiles?: boolean;
+  readonly enableFiles?: boolean;
   readonly excludeRoutes?: readonly string[];
   readonly fullConfig?: PluginOptions;
   readonly rehypeProcessTables?: boolean;

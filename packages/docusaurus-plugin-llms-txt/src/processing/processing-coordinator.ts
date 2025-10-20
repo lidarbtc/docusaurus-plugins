@@ -6,7 +6,7 @@
  */
 
 import { processDocuments } from './route-processor';
-import { filterCachedRoutesForConfig } from '../cache/cache-filter';
+import { filterCachedRoutesForProcessing } from '../cache/cache-filter';
 
 import type { CacheManager } from '../cache/cache';
 import type {
@@ -58,8 +58,8 @@ export async function coordinateProcessing(
   );
 
   if (isCliContext && cache.routes.length > 0) {
-    // CLI context: filter cached routes based on current config
-    const filteredCachedRoutes = filterCachedRoutesForConfig(
+    // CLI context: filter cached routes based on current config (union of generate+indexing)
+    const filteredCachedRoutes = filterCachedRoutesForProcessing(
       cache.routes,
       config,
       logger
@@ -81,8 +81,8 @@ export async function coordinateProcessing(
       logger.warn(`Excluded ${excludedCount} routes by current config`);
     }
   } else if (!isCliContext && cache.routes.length > 0) {
-    // Build context: filter both live routes and cache to ensure consistency
-    const filteredCachedRoutes = filterCachedRoutesForConfig(
+    // Build context: filter both live routes and cache to ensure consistency (union of generate+indexing)
+    const filteredCachedRoutes = filterCachedRoutesForProcessing(
       cache.routes,
       config,
       logger

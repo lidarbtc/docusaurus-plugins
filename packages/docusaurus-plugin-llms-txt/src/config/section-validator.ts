@@ -59,8 +59,8 @@ function validateNoDuplicateIds(sections: readonly SectionDefinition[]): void {
  */
 function validateSectionReferences(
   sections: readonly SectionDefinition[],
-  routeRules?: readonly RouteRule[],
-  attachments?: readonly AttachmentFile[]
+  _routeRules?: readonly RouteRule[],
+  _attachments?: readonly AttachmentFile[]
 ): void {
   const validSectionIds = new Set(collectAllSectionIds(sections));
   const invalidReferences: string[] = [];
@@ -68,14 +68,9 @@ function validateSectionReferences(
   // Global route rules no longer reference sections directly
   // Section route validation is handled separately
 
-  // Check attachment references
-  attachments?.forEach((attachment) => {
-    if (attachment.sectionId && !validSectionIds.has(attachment.sectionId)) {
-      invalidReferences.push(
-        `Attachment '${attachment.source}' references non-existent section '${attachment.sectionId}'`
-      );
-    }
-  });
+  // Note: Global attachments (passed as parameter) no longer have sectionId
+  // They will be assigned to an auto-generated section
+  // Section-specific attachments are validated within sections (no sectionId field)
 
   if (invalidReferences.length > 0) {
     throw new Error(

@@ -13,8 +13,9 @@ import Translate from '@docusaurus/Translate';
 import MenuItem from '@theme/CopyPageContent/DropdownMenu/MenuItem';
 import ChatGPTIcon from '@theme/CopyPageContent/Icons/ChatGPTIcon';
 import ClaudeIcon from '@theme/CopyPageContent/Icons/ClaudeIcon';
-import MarkdownIcon from '@theme/CopyPageContent/Icons/MarkdownIcon';
+import CopyIcon from '@theme/CopyPageContent/Icons/CopyIcon';
 import HtmlIcon from '@theme/CopyPageContent/Icons/HtmlIcon';
+import MarkdownIcon from '@theme/CopyPageContent/Icons/MarkdownIcon';
 
 import type { ResolvedCopyPageContentOptions } from '../../../hooks';
 
@@ -37,6 +38,7 @@ export default function DropdownMenu({
 }: DropdownMenuProps): React.JSX.Element {
   // Memoize action handlers to prevent unnecessary re-renders of MenuItem
   const handleCopyRaw = useCallback(() => onAction('copyRaw'), [onAction]);
+  const handleViewMarkdown = useCallback(() => onAction('viewMarkdown'), [onAction]);
   const handleChatGPT = useCallback(() => onAction('openChatGPT'), [onAction]);
   const handleClaude = useCallback(() => onAction('openClaude'), [onAction]);
 
@@ -48,17 +50,25 @@ export default function DropdownMenu({
         isMobile && styles.dropdownMobile
       )}
     >
-      {finalConfig.markdown && (
+      <MenuItem
+        icon={<CopyIcon />}
+        description={hasMarkdown ? 'Copy page as Markdown for LLMs' : 'Copy page as HTML for LLMs'}
+        onClick={handleCopyRaw}
+      >
+        {hasMarkdown ? (
+          <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
+        ) : (
+          <Translate id='copyPage.copyRawHtml'>Copy Raw HTML</Translate>
+        )}
+      </MenuItem>
+
+      {finalConfig.viewMarkdown && hasMarkdown && (
         <MenuItem
-          icon={hasMarkdown ? <MarkdownIcon /> : <HtmlIcon />}
-          description={hasMarkdown ? 'Copy page as Markdown for LLMs' : 'Copy page as HTML for LLMs'}
-          onClick={handleCopyRaw}
+          icon={<MarkdownIcon />}
+          description='View markdown file in new tab'
+          onClick={handleViewMarkdown}
         >
-          {hasMarkdown ? (
-            <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
-          ) : (
-            <Translate id='copyPage.copyRawHtml'>Copy Raw HTML</Translate>
-          )}
+          <Translate id='copyPage.viewMarkdown'>View Markdown</Translate>
         </MenuItem>
       )}
 

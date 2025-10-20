@@ -11,6 +11,7 @@ import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 // JSON data structure - per-route copy content info
 interface CopyContentData {
   [routePath: string]: {
+    shouldDisplay: boolean;
     hasMarkdown: boolean;
     contentSelectors: readonly string[];
   };

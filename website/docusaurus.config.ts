@@ -54,27 +54,40 @@ const config: Config = {
         onRouteError: 'throw',
         onSectionError: 'warn',
 
-        // Output generation configuration
-        generate: {
-          enableMarkdownFiles: true,
-          enableLlmsFullTxt: true,
+        // Output generation configuration - controls .md file creation
+        markdown: {
+          enableFiles: true,
           relativePaths: true,
-        },
-
-        // Content inclusion/filtering configuration
-        include: {
           includeBlog: true,
           includePages: true,
           includeDocs: true,
-          includeVersionedDocs: false,
-          includeGeneratedIndex: false,
-          excludeRoutes: ['/docs/tutorial-extras/**'],
+          includeVersionedDocs: true, // Generate .md for all versions
+          includeGeneratedIndex: true,
+          excludeRoutes: [
+            '/docs/tutorial-extras/**',
+            '/docs/tutorial-basics/create-a-document'
+          ],
+
+          // Content processing and transformation
+          routeRules: [
+            // Global route rules for cross-cutting concerns only
+          ],
         },
 
-        // Content structure and organization configuration
-        structure: {
+        // Indexing configuration - controls what goes in llms.txt
+        llmsTxt: {
+          enableLlmsFullTxt: true,
+          includeBlog: true,
+          includePages: true,
+          includeDocs: true,
+          includeVersionedDocs: false, // Only current version in llms.txt
+          includeGeneratedIndex: false,
+          excludeRoutes: ['/docs/tutorial-extras/**'],
+          // Structure and organization
           siteTitle: 'My Docusaurus Plugins Collection',
           siteDescription: 'Documentation for Docusaurus plugins',
+          autoSectionPosition: 1.5, // Auto-sections appear between api-docs (1) and dev-guides (2)
+
           sections: [
             {
               id: 'api-docs',
@@ -83,26 +96,56 @@ const config: Config = {
               position: 1,
               routes: [
                 { route: '/api/**' }
-              ]
+              ],
+              // Section-specific attachments
+              attachments: [
+                {
+                  source: './test-files/test-api.yaml',
+                  title: 'Payment API OpenAPI Specification',
+                  description: 'Complete OpenAPI 3.0 specification for our payment processing API',
+                },
+                {
+                  source: './test-files/webhook-events.json',
+                  title: 'Webhook Event Schemas',
+                  description: 'JSON schemas for all webhook events including payment and customer events',
+                },
+              ],
+              // Section-specific optional links
+              optionalLinks: [
+                {
+                  title: 'API Status Page',
+                  url: 'https://status.example.com',
+                  description: 'Real-time API status and uptime monitoring'
+                },
+                {
+                  title: 'Interactive API Explorer',
+                  url: 'https://api-explorer.example.com',
+                  description: 'Test our APIs in an interactive environment'
+                },
+              ],
             },
             {
               id: 'dev-guides',
               name: 'Developer Guides',
               description: 'Tutorials and best practices for developers',
-              position: 2
+              position: 2,
+              // Section-specific attachments
+              attachments: [
+                {
+                  source: './test-files/getting-started.md',
+                  title: 'Getting Started Guide',
+                  description: 'Quick start guide for new developers',
+                },
+                {
+                  source: './test-files/advanced-guide.mdx',
+                  title: 'Advanced Payment Processing',
+                  description: 'Advanced patterns, security best practices, and optimization techniques',
+                },
+              ],
             }
           ],
+          // Global optional links (appear in their own "Optional" section)
           optionalLinks: [
-            {
-              title: 'API Status Page',
-              url: 'https://status.example.com',
-              description: 'Real-time API status and uptime monitoring'
-            },
-            {
-              title: 'Interactive API Explorer',
-              url: 'https://api-explorer.example.com',
-              description: 'Test our APIs in an interactive environment'
-            },
             {
               title: 'Community Forum',
               url: 'https://forum.example.com',
@@ -112,46 +155,51 @@ const config: Config = {
               title: 'GitHub Repository',
               url: 'https://github.com/example/repo',
               description: 'Source code and issue tracking',
+            },
+            {
+              title: 'Support Portal',
+              url: 'https://support.example.com',
+              description: 'Get technical support and troubleshooting help',
             }
           ],
-        },
-
-        // Content processing and transformation configuration
-        processing: {
-          routeRules: [
-            // Global route rules for cross-cutting concerns only
-          ],
+          // Global attachments (appear in auto-generated "Attachments" section)
           attachments: [
             {
               source: './test-files/test-api.yaml',
-              title: 'Payment API OpenAPI Specification',
-              description: 'Complete OpenAPI 3.0 specification for our payment processing API',
-              sectionId: 'api-docs'
-            },
-            {
-              source: './test-files/webhook-events.json',
-              title: 'Webhook Event Schemas',
-              description: 'JSON schemas for all webhook events including payment and customer events',
-              sectionId: 'api-docs'
-            },
-            {
-              source: './test-files/getting-started.md',
-              title: 'Getting Started Guide',
-              description: 'Quick start guide for new developers',
-              sectionId: 'dev-guides'
-            },
-            {
-              source: './test-files/advanced-guide.mdx',
-              title: 'Advanced Payment Processing',
-              description: 'Advanced patterns, security best practices, and optimization techniques',
-              sectionId: 'dev-guides'
+              title: 'Global Shared Schema',
+              description: 'Shared data schema used across all services',
             }
           ],
         },
 
         // User interface features configuration
         ui: {
-          copyPageContent: true,
+          copyPageContent: {
+            buttonLabel: 'Copy Page',
+            contentStrategy: 'prefer-markdown',
+            actions: {
+              viewMarkdown: true,
+              ai: {
+                chatGPT: {
+                  prompt: "Check this link out GPT"
+                },
+                claude: {
+                  prompt: "Check this link out Claude"
+                }
+              }
+            },
+            display: {
+              docs: true,
+              // Test glob pattern matching:
+              // - Single wildcard: exclude all standalone-blog tag pages
+              // - Double wildcard: exclude all tutorial-extras docs
+              excludeRoutes: [
+                '/standalone-blog/tags/*',
+                '/docs/tutorial-extras/**',
+                '/docs/tutorial-basics/create-a-page'
+              ],
+            },
+          },
         },
       } satisfies PluginOptions,
     ],

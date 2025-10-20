@@ -11,7 +11,7 @@ import packageJson from '../../package.json';
 import { CACHE_FILENAME } from '../constants';
 import { CacheIO } from './cache-io';
 import { isCachedRouteValid, calcConfigHash } from './cache-validation';
-import { getProcessingConfig } from '../config';
+import { getMarkdownConfig } from '../config';
 import { getEffectiveConfigForRoute } from '../config/route-rules';
 import { classifyRoute } from '../discovery/content-classifier';
 import { routePathToHtmlPath } from '../discovery/route-filter';
@@ -133,10 +133,10 @@ export class CacheManager {
 
       // Get content selectors from effective config (route-specific or base config)
       // If effectiveConfig has explicit contentSelectors, use them
-      // Otherwise, use the processing config contentSelectors which includes defaults
-      const processingConfig = getProcessingConfig(this.config);
+      // Otherwise, use the markdown config contentSelectors which includes defaults
+      const markdownConfig = getMarkdownConfig(this.config);
       const contentSelectors =
-        effectiveConfig.contentSelectors ?? processingConfig.contentSelectors;
+        effectiveConfig.contentSelectors ?? markdownConfig.contentSelectors;
 
       return {
         ...baseInfo,
@@ -154,7 +154,7 @@ export class CacheManager {
     cachedRoute: CachedRouteInfo,
     doc: DocInfo,
     hash: string,
-    enableMarkdownFiles: boolean
+    enableFiles: boolean
   ): CachedRouteInfo {
     const baseUpdate = {
       ...cachedRoute,
@@ -163,9 +163,9 @@ export class CacheManager {
       description: doc.description,
     };
 
-    if (enableMarkdownFiles && doc.markdownFile) {
+    if (enableFiles && doc.markdownFile) {
       return { ...baseUpdate, markdownFile: doc.markdownFile };
-    } else if (enableMarkdownFiles && cachedRoute.htmlPath) {
+    } else if (enableFiles && cachedRoute.htmlPath) {
       const mdPath = htmlPathToMdPath(
         cachedRoute.htmlPath,
         this.pathManager.directories.mdOutDir

@@ -9,7 +9,7 @@ import path from 'path';
 
 import fs from 'fs-extra';
 
-import { getStructureConfig, getProcessingConfig } from '../config';
+import { getLlmsTxtConfig, getMarkdownConfig } from '../config';
 import { buildUnifiedDocumentTree } from './index-builder';
 import {
   processMarkdownForFullContent,
@@ -44,11 +44,11 @@ export async function buildLlmsFullTxtContent(
     (doc) => doc.routePath === '/' || doc.routePath === '/index'
   );
 
-  const structureConfig = getStructureConfig(config);
-  const processingConfig = getProcessingConfig(config);
+  const llmsTxtConfig = getLlmsTxtConfig(config);
+  const markdownConfig = getMarkdownConfig(config);
 
   const documentTitle =
-    structureConfig.siteTitle ||
+    llmsTxtConfig.siteTitle ||
     siteConfig.title ||
     rootDoc?.title ||
     'Documentation';
@@ -56,13 +56,13 @@ export async function buildLlmsFullTxtContent(
   let content = `# ${documentTitle}\n\n`;
 
   // Add description if available
-  const description = structureConfig.siteDescription || rootDoc?.description;
+  const description = llmsTxtConfig.siteDescription || rootDoc?.description;
   if (description) {
     content += `> ${description}\n\n`;
   }
 
-  // Get remarkStringify options from processing config
-  const remarkStringifyOptions = processingConfig.remarkStringify;
+  // Get remarkStringify options from markdown config
+  const remarkStringifyOptions = markdownConfig.remarkStringify;
 
   // Build unified document tree for category organization
   const { tree } = buildUnifiedDocumentTree(docs, config, attachments);

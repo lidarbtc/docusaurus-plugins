@@ -10,10 +10,10 @@ import * as fs from 'fs-extra';
 import { registerLlmsTxt, registerLlmsTxtClean } from './cli/command';
 import {
   getConfig,
-  getProcessingConfig,
-  getGenerateConfig,
+  getMarkdownConfig,
   getUiConfig,
   validateUserInputs,
+  collectAllAttachments,
 } from './config';
 import { ERROR_MESSAGES, PLUGIN_NAME } from './constants';
 import { generateCopyContentJson } from './copy-button/json-generator';
@@ -283,18 +283,16 @@ export default function llmsTxtPlugin(
         );
 
         // Get configuration groups
-        const processingConfig = getProcessingConfig(config);
-        const generateConfig = getGenerateConfig(config);
+        const markdownConfig = getMarkdownConfig(config);
 
         // Process attachments if configured before orchestrating processing
+        // Collect all attachments (global + section-specific) with their sectionIds
         let processedAttachments: ProcessedAttachment[] | undefined;
-        if (
-          processingConfig.attachments &&
-          processingConfig.attachments.length > 0
-        ) {
+        const allAttachments = collectAllAttachments(config);
+        if (allAttachments.length > 0) {
           const attachmentProcessor = new AttachmentProcessor(log);
           processedAttachments = await attachmentProcessor.processAttachments(
-            processingConfig.attachments,
+            allAttachments,
             siteDir,
             outDir
           );
@@ -311,8 +309,8 @@ export default function llmsTxtPlugin(
             siteConfig,
             outDir,
             logger: log,
-            contentSelectors: processingConfig.contentSelectors,
-            relativePaths: generateConfig.relativePaths,
+            contentSelectors: markdownConfig.contentSelectors,
+            relativePaths: markdownConfig.relativePaths,
           },
           enhancedCachedRoutes,
           processedAttachments // Pass attachments for integration
@@ -335,7 +333,8 @@ export default function llmsTxtPlugin(
           await generateCopyContentJson(
             [...updatedCache.routes],
             copyDataPath,
-            log
+            log,
+            config
           );
         }
 
