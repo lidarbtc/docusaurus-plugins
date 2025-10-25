@@ -22,7 +22,6 @@ export interface CopyButtonProps {
   isOpen: boolean;
   onMainAction: () => void | Promise<void>;
   onDropdownToggle: () => void;
-  hasMarkdown?: boolean;
 }
 
 function CopyButton({
@@ -31,7 +30,6 @@ function CopyButton({
   isOpen,
   onMainAction,
   onDropdownToggle,
-  hasMarkdown,
 }: CopyButtonProps): React.JSX.Element {
   const ariaLabel = copyStatus === 'success' ? 'Copied' : 'Copy page';
 

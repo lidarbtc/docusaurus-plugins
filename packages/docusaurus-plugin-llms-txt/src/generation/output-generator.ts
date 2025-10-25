@@ -7,11 +7,7 @@
 
 import path from 'path';
 
-import {
-  getMarkdownConfig,
-  getLlmsTxtIncludeConfig,
-  getLlmsTxtConfig,
-} from '../config';
+import { getLlmsTxtIncludeConfig, getLlmsTxtConfig } from '../config';
 import {
   CONTENT_TYPES,
   LLMS_FULL_TXT_FILENAME,

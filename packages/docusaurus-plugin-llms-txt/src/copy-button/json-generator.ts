@@ -9,8 +9,8 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 
-import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 import { DEFAULT_CONTENT_SELECTORS } from '../constants';
+import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 
 import type { CachedRouteInfo, Logger, PluginOptions } from '../types';
 

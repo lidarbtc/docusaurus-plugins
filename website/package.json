@@ -1,6 +1,6 @@
 {
   "name": "website",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
@@ -24,8 +24,8 @@
     "@docusaurus/tsconfig": "^3.9.1",
     "@docusaurus/types": "^3.9.1",
     "@mdx-js/react": "^3.0.0",
-    "@signalwire/docusaurus-plugin-llms-txt": "file:../packages/docusaurus-plugin-llms-txt",
-    "@signalwire/docusaurus-theme-llms-txt": "file:../packages/docusaurus-theme-llms-txt",
+    "@signalwire/docusaurus-plugin-llms-txt": "2.0.0-alpha.3",
+    "@signalwire/docusaurus-theme-llms-txt": "1.0.0-alpha.4",
     "clsx": "^2.0.0",
     "docusaurus-plugin-sass": "^0.2.6",
     "prism-react-renderer": "^2.3.0",

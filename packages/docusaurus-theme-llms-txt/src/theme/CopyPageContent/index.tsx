@@ -108,7 +108,6 @@ export default function CopyPageContent({
         isOpen={isOpen}
         onMainAction={handleMainAction}
         onDropdownToggle={handleDropdownToggle}
-        hasMarkdown={hasMarkdown}
       />
 
       <DropdownMenu

@@ -165,14 +165,18 @@ export interface LlmsTxtOptions {
   readonly siteDescription?: string;
   /** Whether to include descriptions in llms.txt links (default: true) */
   readonly enableDescriptions?: boolean;
-  /** Automatically determine section heading depth based on route depth (default: 1)
-   * - 1: depth-1 routes get H2, depth-2 routes get H3, depth-3 routes get H4, etc.
-   * - 2: depth-1 routes get H3, depth-2 routes get H4, depth-3 routes get H5, etc.
+  /**
+   * Automatically determine section heading depth based on route depth
+   * (default: 1)
+   * - 1: depth-1 routes get H2, depth-2 routes get H3, etc.
+   * - 2: depth-1 routes get H3, depth-2 routes get H4, etc.
    */
   readonly autoSectionDepth?: 1 | 2 | 3 | 4 | 5 | 6;
-  /** Position value assigned to auto-generated sections (default: undefined)
-   * - undefined: auto-sections appear after all positioned sections, sorted alphabetically
-   * - number: auto-sections get this position value and sort with other positioned sections
+  /**
+   * Position value assigned to auto-generated sections
+   * (default: undefined)
+   * - undefined: auto-sections appear after positioned sections
+   * - number: auto-sections sort with other positioned sections
    */
   readonly autoSectionPosition?: number;
   /** Additional links to include in llms.txt */

@@ -7,7 +7,6 @@
 
 import { createSlugger } from '@docusaurus/utils';
 
-import { DEFAULT_MARKDOWN_HEADER_LEVEL } from '../constants';
 import { formatUrl } from '../utils/url';
 
 import type { TreeNode, DocInfo } from '../types';

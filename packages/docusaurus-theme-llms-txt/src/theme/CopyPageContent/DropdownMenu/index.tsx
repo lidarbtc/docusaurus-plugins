@@ -13,7 +13,6 @@ import Translate from '@docusaurus/Translate';
 import MenuItem from '@theme/CopyPageContent/DropdownMenu/MenuItem';
 import ChatGPTIcon from '@theme/CopyPageContent/Icons/ChatGPTIcon';
 import ClaudeIcon from '@theme/CopyPageContent/Icons/ClaudeIcon';
-import CopyIcon from '@theme/CopyPageContent/Icons/CopyIcon';
 import HtmlIcon from '@theme/CopyPageContent/Icons/HtmlIcon';
 import MarkdownIcon from '@theme/CopyPageContent/Icons/MarkdownIcon';
 
