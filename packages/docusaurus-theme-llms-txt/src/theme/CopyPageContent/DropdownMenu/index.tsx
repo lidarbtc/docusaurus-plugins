@@ -41,7 +41,10 @@ export default function DropdownMenu({
 
   // Memoize action handlers to prevent unnecessary re-renders of MenuItem
   const handleCopyRaw = useCallback(() => onAction('copyRaw'), [onAction]);
-  const handleViewMarkdown = useCallback(() => onAction('viewMarkdown'), [onAction]);
+  const handleViewMarkdown = useCallback(
+    () => onAction('viewMarkdown'),
+    [onAction]
+  );
   const handleChatGPT = useCallback(() => onAction('openChatGPT'), [onAction]);
   const handleClaude = useCallback(() => onAction('openClaude'), [onAction]);
 
@@ -55,7 +58,11 @@ export default function DropdownMenu({
     >
       <MenuItem
         icon={willCopyMarkdown ? <MarkdownIcon /> : <HtmlIcon />}
-        description={willCopyMarkdown ? 'Copy page as Markdown for LLMs' : 'Copy page as HTML for LLMs'}
+        description={
+          willCopyMarkdown
+            ? 'Copy page as Markdown for LLMs'
+            : 'Copy page as HTML for LLMs'
+        }
         onClick={handleCopyRaw}
       >
         {willCopyMarkdown ? (

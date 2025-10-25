@@ -64,10 +64,7 @@ export async function processHtmlFileWithContext(
 
     // Process content if markdown files are enabled OR if llms-full.txt is
     // enabled
-    if (
-      markdownConfig.enableFiles ||
-      llmsTxtConfig.enableLlmsFullTxt
-    ) {
+    if (markdownConfig.enableFiles || llmsTxtConfig.enableLlmsFullTxt) {
       // Full processing for individual markdown files
       const conversionOptions: MarkdownConversionOptions = {
         remarkStringify: markdownConfig.remarkStringify,

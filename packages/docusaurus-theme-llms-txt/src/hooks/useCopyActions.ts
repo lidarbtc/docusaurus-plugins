@@ -61,10 +61,7 @@ export default function useCopyActions(
             .then((text) => new Blob([text], { type: 'text/plain' }));
         } else {
           // No markdown available - fetch and extract HTML content
-          const htmlUrl = constructHtmlUrl(
-            pathname,
-            siteConfig?.trailingSlash
-          );
+          const htmlUrl = constructHtmlUrl(pathname, siteConfig?.trailingSlash);
           console.debug('No markdown available, fetching HTML content');
 
           textPromise = fetch(htmlUrl)

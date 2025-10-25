@@ -103,10 +103,7 @@ function filterDocsForIndexing(
     }
 
     // Check generated index
-    if (
-      cachedRoute.isGeneratedIndex &&
-      !indexingConfig.includeGeneratedIndex
-    ) {
+    if (cachedRoute.isGeneratedIndex && !indexingConfig.includeGeneratedIndex) {
       logger.debug(
         `Excluding from llms.txt (generated index): ${doc.routePath}`
       );

@@ -156,11 +156,18 @@ export function shouldProcessRoute(
   const llmsTxt = options.llmsTxt ?? {};
 
   const unionConfig: IncludeFilterConfig = {
-    includeDocs: (markdown.includeDocs ?? true) || (llmsTxt.includeDocs ?? true),
-    includeVersionedDocs: (markdown.includeVersionedDocs ?? true) || (llmsTxt.includeVersionedDocs ?? false),
-    includeBlog: (markdown.includeBlog ?? false) || (llmsTxt.includeBlog ?? false),
-    includePages: (markdown.includePages ?? false) || (llmsTxt.includePages ?? false),
-    includeGeneratedIndex: (markdown.includeGeneratedIndex ?? true) || (llmsTxt.includeGeneratedIndex ?? true),
+    includeDocs:
+      (markdown.includeDocs ?? true) || (llmsTxt.includeDocs ?? true),
+    includeVersionedDocs:
+      (markdown.includeVersionedDocs ?? true) ||
+      (llmsTxt.includeVersionedDocs ?? false),
+    includeBlog:
+      (markdown.includeBlog ?? false) || (llmsTxt.includeBlog ?? false),
+    includePages:
+      (markdown.includePages ?? false) || (llmsTxt.includePages ?? false),
+    includeGeneratedIndex:
+      (markdown.includeGeneratedIndex ?? true) ||
+      (llmsTxt.includeGeneratedIndex ?? true),
     excludeRoutes: [], // Exclusions handled separately
   };
 

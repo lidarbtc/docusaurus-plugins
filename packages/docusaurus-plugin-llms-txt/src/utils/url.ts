@@ -77,11 +77,7 @@ export function formatUrl(
   },
   baseUrl = ''
 ): string {
-  const {
-    enableFiles = true,
-    relativePaths = true,
-    markdownFile,
-  } = options;
+  const { enableFiles = true, relativePaths = true, markdownFile } = options;
 
   // Ensure route path starts with /
   let targetPath = ensureLeadingSlash(routePath);

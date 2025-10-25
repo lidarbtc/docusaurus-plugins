@@ -191,21 +191,22 @@ export default config;
 
 ## API Reference
 
-The plugin configuration is organized into three main areas: **markdown file generation**, **llms.txt index creation**, and **UI features**.
+The plugin configuration is organized into three main areas: **markdown file generation**,
+**llms.txt index creation**, and **UI features**.
 
 ### Top-Level Options
 
 These options control plugin behavior and error handling.
 
-| Property         | Type                                           | Required | Default  | Description                                                                                                                                                    |
-| ---------------- | ---------------------------------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `markdown`       | [`MarkdownOptions`](#markdownoptions)          | ❌       | `{}`     | Generate individual .md files for each page. See [MarkdownOptions](#markdownoptions) below.                                                                   |
-| `llmsTxt`        | [`LlmsTxtOptions`](#llmstxtoptions)            | ❌       | `{}`     | Generate llms.txt index file with organized content. See [LlmsTxtOptions](#llmstxtoptions) below.                                                             |
-| `ui`             | [`UiOptions`](#uioptions)                      | ❌       | `{}`     | Enable UI features like copy buttons. See [UiOptions](#uioptions) below.                                                                                      |
-| `runOnPostBuild` | `boolean`                                      | ❌       | `true`   | Automatically run during build. Set to `false` to manually trigger via CLI.                                                                                   |
-| `onSectionError` | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How to handle section configuration errors (invalid IDs, route conflicts).                                                                                     |
-| `onRouteError`   | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How to handle page processing errors (HTML parsing failures). `'warn'` skips failed pages and continues.                                                      |
-| `logLevel`       | `0` \| `1` \| `2` \| `3`                       | ❌       | `1`      | Console output verbosity. `0`=silent, `1`=normal, `2`=verbose, `3`=debug.                                                                                     |
+| Property         | Type                                           | Required | Default  | Description                                                                                              |
+| ---------------- | ---------------------------------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `markdown`       | [`MarkdownOptions`](#markdownoptions)          | ❌       | `{}`     | Generate individual .md files for each page. See [MarkdownOptions](#markdownoptions) below.              |
+| `llmsTxt`        | [`LlmsTxtOptions`](#llmstxtoptions)            | ❌       | `{}`     | Generate llms.txt index file with organized content. See [LlmsTxtOptions](#llmstxtoptions) below.        |
+| `ui`             | [`UiOptions`](#uioptions)                      | ❌       | `{}`     | Enable UI features like copy buttons. See [UiOptions](#uioptions) below.                                 |
+| `runOnPostBuild` | `boolean`                                      | ❌       | `true`   | Automatically run during build. Set to `false` to manually trigger via CLI.                              |
+| `onSectionError` | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How to handle section configuration errors (invalid IDs, route conflicts).                               |
+| `onRouteError`   | `'ignore'` \| `'log'` \| `'warn'` \| `'throw'` | ❌       | `'warn'` | How to handle page processing errors (HTML parsing failures). `'warn'` skips failed pages and continues. |
+| `logLevel`       | `0` \| `1` \| `2` \| `3`                       | ❌       | `1`      | Console output verbosity. `0`=silent, `1`=normal, `2`=verbose, `3`=debug.                                |
 
 ---
 
@@ -213,25 +214,25 @@ These options control plugin behavior and error handling.
 
 Generate individual .md files for each page.
 
-| Property                     | Type                        | Required | Default                                                                                              | Description                                                                                       |
-| ---------------------------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `enableFiles`                | `boolean`                   | ❌       | `true`                                                                                               | Generate .md files. Disable to skip file generation entirely.                                        |
-| `relativePaths`              | `boolean`                   | ❌       | `true`                                                                                               | Use relative paths (`./docs/intro.md`) vs absolute URLs (`https://site.com/docs/intro`).         |
-| `includeDocs`                | `boolean`                   | ❌       | `true`                                                                                               | Include documentation pages.                                                                          |
-| `includeVersionedDocs`       | `boolean`                   | ❌       | `true`                                                                                               | Include older doc versions. Disable to only process current version.                                 |
-| `includeBlog`                | `boolean`                   | ❌       | `false`                                                                                              | Include blog posts.                                                                                   |
-| `includePages`               | `boolean`                   | ❌       | `false`                                                                                              | Include standalone pages from `src/pages/`.                                                           |
-| `includeGeneratedIndex`      | `boolean`                   | ❌       | `true`                                                                                               | Include auto-generated category index pages.                                                          |
-| `excludeRoutes`              | `string[]`                  | ❌       | `[]`                                                                                                 | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                   |
-| `contentSelectors`           | `string[]`                  | ❌       | `['.theme-doc-markdown', 'main .container .col', 'main .theme-doc-wrapper', 'article', 'main']`     | CSS selectors to find main content. First match wins.                                            |
-| `routeRules`                 | [`RouteRule[]`](#routerule) | ❌       | `[]`                                                                                                 | Override selectors for specific routes. See [RouteRule](#routerule).                             |
-| `remarkStringify`            | `object`                    | ❌       | `{}`                                                                                                 | Markdown formatting options. See [remark-stringify](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify#options). |
-| `remarkGfm`                  | `boolean \| object`         | ❌       | `true`                                                                                               | Enable GitHub Flavored Markdown (tables, strikethrough, task lists).                                  |
-| `rehypeProcessTables`        | `boolean`                   | ❌       | `true`                                                                                               | Convert HTML tables to markdown. Disable for complex tables.                                          |
-| `beforeDefaultRehypePlugins` | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom rehype plugins to run BEFORE defaults.                                                 |
-| `rehypePlugins`              | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom rehype plugins that REPLACE defaults. Use with caution.                                             |
-| `beforeDefaultRemarkPlugins` | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom remark plugins to run BEFORE defaults.                                             |
-| `remarkPlugins`              | `PluginInput[]`             | ❌       | `[]`                                                                                                 | Custom remark plugins that REPLACE defaults. Use with caution.                                         |
+| Property                     | Type                        | Required | Default                                                                                         | Description                                                                                                                          |
+| ---------------------------- | --------------------------- | -------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `enableFiles`                | `boolean`                   | ❌       | `true`                                                                                          | Generate .md files. Disable to skip file generation entirely.                                                                        |
+| `relativePaths`              | `boolean`                   | ❌       | `true`                                                                                          | Use relative paths (`./docs/intro.md`) vs absolute URLs (`https://site.com/docs/intro`).                                             |
+| `includeDocs`                | `boolean`                   | ❌       | `true`                                                                                          | Include documentation pages.                                                                                                         |
+| `includeVersionedDocs`       | `boolean`                   | ❌       | `true`                                                                                          | Include older doc versions. Disable to only process current version.                                                                 |
+| `includeBlog`                | `boolean`                   | ❌       | `false`                                                                                         | Include blog posts.                                                                                                                  |
+| `includePages`               | `boolean`                   | ❌       | `false`                                                                                         | Include standalone pages from `src/pages/`.                                                                                          |
+| `includeGeneratedIndex`      | `boolean`                   | ❌       | `true`                                                                                          | Include auto-generated category index pages.                                                                                         |
+| `excludeRoutes`              | `string[]`                  | ❌       | `[]`                                                                                            | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                                                   |
+| `contentSelectors`           | `string[]`                  | ❌       | `['.theme-doc-markdown', 'main .container .col', 'main .theme-doc-wrapper', 'article', 'main']` | CSS selectors to find main content. First match wins.                                                                                |
+| `routeRules`                 | [`RouteRule[]`](#routerule) | ❌       | `[]`                                                                                            | Override selectors for specific routes. See [RouteRule](#routerule).                                                                 |
+| `remarkStringify`            | `object`                    | ❌       | `{}`                                                                                            | Markdown formatting options. See [remark-stringify](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify#options). |
+| `remarkGfm`                  | `boolean \| object`         | ❌       | `true`                                                                                          | Enable GitHub Flavored Markdown (tables, strikethrough, task lists).                                                                 |
+| `rehypeProcessTables`        | `boolean`                   | ❌       | `true`                                                                                          | Convert HTML tables to markdown. Disable for complex tables.                                                                         |
+| `beforeDefaultRehypePlugins` | `PluginInput[]`             | ❌       | `[]`                                                                                            | Custom rehype plugins to run BEFORE defaults.                                                                                        |
+| `rehypePlugins`              | `PluginInput[]`             | ❌       | `[]`                                                                                            | Custom rehype plugins that REPLACE defaults. Use with caution.                                                                       |
+| `beforeDefaultRemarkPlugins` | `PluginInput[]`             | ❌       | `[]`                                                                                            | Custom remark plugins to run BEFORE defaults.                                                                                        |
+| `remarkPlugins`              | `PluginInput[]`             | ❌       | `[]`                                                                                            | Custom remark plugins that REPLACE defaults. Use with caution.                                                                       |
 
 ---
 
@@ -239,23 +240,23 @@ Generate individual .md files for each page.
 
 Generate and configure the llms.txt index file.
 
-| Property                | Type                                        | Required | Default | Description                                                                                           |
-| ----------------------- | ------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------- |
-| `enableLlmsFullTxt`     | `boolean`                                   | ❌       | `false` | Generate llms-full.txt with complete page content (not just links).                                  |
-| `includeDocs`           | `boolean`                                   | ❌       | `true`  | Include documentation pages.                                                                          |
-| `includeVersionedDocs`  | `boolean`                                   | ❌       | `false` | ⚠️ Include older doc versions. **Default is `false`** (different from markdown).                     |
-| `includeBlog`           | `boolean`                                   | ❌       | `false` | Include blog posts.                                                                                   |
-| `includePages`          | `boolean`                                   | ❌       | `false` | Include standalone pages from `src/pages/`.                                                           |
-| `includeGeneratedIndex` | `boolean`                                   | ❌       | `true`  | Include auto-generated category index pages.                                                          |
-| `excludeRoutes`         | `string[]`                                  | ❌       | `[]`    | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                   |
-| `sections`              | [`SectionDefinition[]`](#sectiondefinition) | ❌       | `[]`    | Organize content into named sections. See [SectionDefinition](#sectiondefinition).                    |
-| `autoSectionDepth`      | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                | ❌       | `1`     | Heading offset: `1`=routes use H2/H3/H4, `2`=routes use H3/H4/H5.                                    |
+| Property                | Type                                        | Required | Default     | Description                                                                                                        |
+| ----------------------- | ------------------------------------------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `enableLlmsFullTxt`     | `boolean`                                   | ❌       | `false`     | Generate llms-full.txt with complete page content (not just links).                                                |
+| `includeDocs`           | `boolean`                                   | ❌       | `true`      | Include documentation pages.                                                                                       |
+| `includeVersionedDocs`  | `boolean`                                   | ❌       | `false`     | ⚠️ Include older doc versions. **Default is `false`** (different from markdown).                                   |
+| `includeBlog`           | `boolean`                                   | ❌       | `false`     | Include blog posts.                                                                                                |
+| `includePages`          | `boolean`                                   | ❌       | `false`     | Include standalone pages from `src/pages/`.                                                                        |
+| `includeGeneratedIndex` | `boolean`                                   | ❌       | `true`      | Include auto-generated category index pages.                                                                       |
+| `excludeRoutes`         | `string[]`                                  | ❌       | `[]`        | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                                 |
+| `sections`              | [`SectionDefinition[]`](#sectiondefinition) | ❌       | `[]`        | Organize content into named sections. See [SectionDefinition](#sectiondefinition).                                 |
+| `autoSectionDepth`      | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                | ❌       | `1`         | Heading offset: `1`=routes use H2/H3/H4, `2`=routes use H3/H4/H5.                                                  |
 | `autoSectionPosition`   | `number`                                    | ❌       | `undefined` | Position for auto-generated sections. `undefined`=after positioned sections, number=sort with positioned sections. |
-| `siteTitle`             | `string`                                    | ❌       | `''`    | Title for llms.txt header. Falls back to Docusaurus config if not set.                               |
-| `siteDescription`       | `string`                                    | ❌       | `''`    | Description for llms.txt header.                                                                      |
-| `enableDescriptions`    | `boolean`                                   | ❌       | `true`  | Include page and section descriptions. Disable for a more compact index.                              |
-| `attachments`           | [`AttachmentFile[]`](#attachmentfile)       | ❌       | `[]`    | Include files like OpenAPI specs, schemas. Appear in 'Attachments' section.                          |
-| `optionalLinks`         | [`OptionalLink[]`](#optionallink)           | ❌       | `[]`    | External links (APIs, forums). Appear in 'Optional' section.                                         |
+| `siteTitle`             | `string`                                    | ❌       | `''`        | Title for llms.txt header. Falls back to Docusaurus config if not set.                                             |
+| `siteDescription`       | `string`                                    | ❌       | `''`        | Description for llms.txt header.                                                                                   |
+| `enableDescriptions`    | `boolean`                                   | ❌       | `true`      | Include page and section descriptions. Disable for a more compact index.                                           |
+| `attachments`           | [`AttachmentFile[]`](#attachmentfile)       | ❌       | `[]`        | Include files like OpenAPI specs, schemas. Appear in 'Attachments' section.                                        |
+| `optionalLinks`         | [`OptionalLink[]`](#optionallink)           | ❌       | `[]`        | External links (APIs, forums). Appear in 'Optional' section.                                                       |
 
 ---
 
@@ -263,9 +264,9 @@ Generate and configure the llms.txt index file.
 
 Enable UI features on your documentation pages.
 
-| Property          | Type                                                                  | Required | Default | Description                                                                                                     |
-| ----------------- | --------------------------------------------------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------- |
-| `copyPageContent` | `boolean \| ` [`CopyPageContentOptions`](#copypagecontentoptions)     | ❌       | `false` | Add copy button to doc pages. Use `true` for defaults or object for customization. **Requires theme package.** |
+| Property          | Type                                                              | Required | Default | Description                                                                                                    |
+| ----------------- | ----------------------------------------------------------------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| `copyPageContent` | `boolean \| ` [`CopyPageContentOptions`](#copypagecontentoptions) | ❌       | `false` | Add copy button to doc pages. Use `true` for defaults or object for customization. **Requires theme package.** |
 
 ---
 
@@ -290,16 +291,16 @@ Organize content into logical sections in llms.txt.
 }
 ```
 
-| Property        | Type                              | Required | Description                                                                                            |
-| --------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `id`            | `string`                          | ✅       | Unique identifier (lowercase, numbers, hyphens only). Must be unique across all sections.             |
-| `name`          | `string`                          | ✅       | Display name shown in llms.txt.                                                                        |
-| `description`   | `string`                          | ❌       | Optional description shown under heading.                                                              |
-| `position`      | `number`                          | ❌       | Sort order. Lower numbers appear first.                                                                |
-| `routes`        | [`SectionRoute[]`](#sectionroute) | ❌       | Glob patterns to match pages to this section.                                                          |
-| `subsections`   | `SectionDefinition[]`             | ❌       | Nested sections (max 3 levels recommended).                                                            |
-| `attachments`   | [`AttachmentFile[]`](#attachmentfile) | ❌       | Files specific to this section.                                                                        |
-| `optionalLinks` | [`OptionalLink[]`](#optionallink)     | ❌       | External links specific to this section.                                                               |
+| Property        | Type                                  | Required | Description                                                                               |
+| --------------- | ------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `id`            | `string`                              | ✅       | Unique identifier (lowercase, numbers, hyphens only). Must be unique across all sections. |
+| `name`          | `string`                              | ✅       | Display name shown in llms.txt.                                                           |
+| `description`   | `string`                              | ❌       | Optional description shown under heading.                                                 |
+| `position`      | `number`                              | ❌       | Sort order. Lower numbers appear first.                                                   |
+| `routes`        | [`SectionRoute[]`](#sectionroute)     | ❌       | Glob patterns to match pages to this section.                                             |
+| `subsections`   | `SectionDefinition[]`                 | ❌       | Nested sections (max 3 levels recommended).                                               |
+| `attachments`   | [`AttachmentFile[]`](#attachmentfile) | ❌       | Files specific to this section.                                                           |
+| `optionalLinks` | [`OptionalLink[]`](#optionallink)     | ❌       | External links specific to this section.                                                  |
 
 #### SectionRoute
 
@@ -312,10 +313,10 @@ Assign routes to sections using glob patterns.
 }
 ```
 
-| Property           | Type       | Required | Description                                                                                            |
-| ------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `route`            | `string`   | ✅       | Glob pattern (`*` = single level, `**` = multiple levels).                                            |
-| `contentSelectors` | `string[]` | ❌       | Override content extraction for these routes.                                                          |
+| Property           | Type       | Required | Description                                                |
+| ------------------ | ---------- | -------- | ---------------------------------------------------------- |
+| `route`            | `string`   | ✅       | Glob pattern (`*` = single level, `**` = multiple levels). |
+| `contentSelectors` | `string[]` | ❌       | Override content extraction for these routes.              |
 
 #### RouteRule
 
@@ -328,12 +329,13 @@ Customize content extraction for specific routes (separate from section assignme
 }
 ```
 
-| Property           | Type       | Required | Description                                                                                            |
-| ------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `route`            | `string`   | ✅       | Glob pattern matching routes.                                                                          |
-| `contentSelectors` | `string[]` | ❌       | CSS selectors for content extraction.                                                                  |
+| Property           | Type       | Required | Description                           |
+| ------------------ | ---------- | -------- | ------------------------------------- |
+| `route`            | `string`   | ✅       | Glob pattern matching routes.         |
+| `contentSelectors` | `string[]` | ❌       | CSS selectors for content extraction. |
 
-**Note:** Use `RouteRule` (in `markdown.routeRules`) for processing customization. Use `SectionRoute` (in `sections[].routes`) for section assignment.
+**Note:** Use `RouteRule` (in `markdown.routeRules`) for processing customization. Use
+`SectionRoute` (in `sections[].routes`) for section assignment.
 
 #### AttachmentFile
 
@@ -348,12 +350,12 @@ Include external text files in your output.
 }
 ```
 
-| Property           | Type      | Default | Description                                                                                            |
-| ------------------ | --------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| `source`           | `string`  | -       | File path relative to site root.                                                                       |
-| `title`            | `string`  | -       | Display name in llms.txt.                                                                              |
-| `description`      | `string`  | -       | Optional context about the file.                                                                       |
-| `includeInFullTxt` | `boolean` | `true`  | Include full content in llms-full.txt.                                                                 |
+| Property           | Type      | Default | Description                            |
+| ------------------ | --------- | ------- | -------------------------------------- |
+| `source`           | `string`  | -       | File path relative to site root.       |
+| `title`            | `string`  | -       | Display name in llms.txt.              |
+| `description`      | `string`  | -       | Optional context about the file.       |
+| `includeInFullTxt` | `boolean` | `true`  | Include full content in llms-full.txt. |
 
 #### OptionalLink
 
@@ -367,11 +369,11 @@ Link to external resources.
 }
 ```
 
-| Property      | Type     | Required | Description                                                                                            |
-| ------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `title`       | `string` | ✅       | Link text shown in llms.txt.                                                                           |
-| `url`         | `string` | ✅       | External URL (must be HTTP/HTTPS).                                                                     |
-| `description` | `string` | ❌       | Optional context about the link.                                                                       |
+| Property      | Type     | Required | Description                        |
+| ------------- | -------- | -------- | ---------------------------------- |
+| `title`       | `string` | ✅       | Link text shown in llms.txt.       |
+| `url`         | `string` | ✅       | External URL (must be HTTP/HTTPS). |
+| `description` | `string` | ❌       | Optional context about the link.   |
 
 #### CopyPageContentOptions
 
@@ -395,17 +397,17 @@ Configure the copy button feature (requires theme package).
 }
 ```
 
-| Property                    | Type                                   | Required | Default             | Description                                                                                            |
-| --------------------------- | -------------------------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| `buttonLabel`               | `string`                               | ❌       | `'Copy Page'`       | Button text.                                                                                           |
-| `display`                   | `object`                               | ❌       | `{}`                | Control where button appears.                                                                          |
-| `display.docs`              | `boolean`                              | ❌       | `true`              | Show on docs pages.                                                                                    |
-| `display.excludeRoutes`     | `string[]`                             | ❌       | `[]`                | Hide on specific routes (glob patterns).                                                               |
-| `contentStrategy`           | `'prefer-markdown' \| 'html-only'`     | ❌       | `'prefer-markdown'` | Controls what content is copied. `'prefer-markdown'` copies markdown if available, falls back to HTML. `'html-only'` always copies HTML. Dropdown menu item shows "Copy Raw Markdown" or "Copy Raw HTML" accordingly. |
-| `actions`                   | `object`                               | ❌       | `{}`                | Available actions in dropdown.                                                                         |
-| `actions.viewMarkdown`      | `boolean`                              | ❌       | `true`              | Show "View Markdown" option in dropdown when markdown file exists. Independent of `contentStrategy`.   |
-| `actions.ai`                | `object`                               | ❌       | `{}`                | AI integration options.                                                                                |
-| `actions.ai.chatGPT`        | `boolean \| { prompt?: string }`       | ❌       | `true`              | ChatGPT integration. Default prompt: "Analyze this documentation:"                                     |
-| `actions.ai.claude`         | `boolean \| { prompt?: string }`       | ❌       | `true`              | Claude integration. Default prompt: "Analyze this documentation:"                                      |
+| Property                | Type                               | Required | Default             | Description                                                                                                                                                                                                           |
+| ----------------------- | ---------------------------------- | -------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `buttonLabel`           | `string`                           | ❌       | `'Copy Page'`       | Button text.                                                                                                                                                                                                          |
+| `display`               | `object`                           | ❌       | `{}`                | Control where button appears.                                                                                                                                                                                         |
+| `display.docs`          | `boolean`                          | ❌       | `true`              | Show on docs pages.                                                                                                                                                                                                   |
+| `display.excludeRoutes` | `string[]`                         | ❌       | `[]`                | Hide on specific routes (glob patterns).                                                                                                                                                                              |
+| `contentStrategy`       | `'prefer-markdown' \| 'html-only'` | ❌       | `'prefer-markdown'` | Controls what content is copied. `'prefer-markdown'` copies markdown if available, falls back to HTML. `'html-only'` always copies HTML. Dropdown menu item shows "Copy Raw Markdown" or "Copy Raw HTML" accordingly. |
+| `actions`               | `object`                           | ❌       | `{}`                | Available actions in dropdown.                                                                                                                                                                                        |
+| `actions.viewMarkdown`  | `boolean`                          | ❌       | `true`              | Show "View Markdown" option in dropdown when markdown file exists. Independent of `contentStrategy`.                                                                                                                  |
+| `actions.ai`            | `object`                           | ❌       | `{}`                | AI integration options.                                                                                                                                                                                               |
+| `actions.ai.chatGPT`    | `boolean \| { prompt?: string }`   | ❌       | `true`              | ChatGPT integration. Default prompt: "Analyze this documentation:"                                                                                                                                                    |
+| `actions.ai.claude`     | `boolean \| { prompt?: string }`   | ❌       | `true`              | Claude integration. Default prompt: "Analyze this documentation:"                                                                                                                                                     |
 
 MIT © [SignalWire](https://github.com/signalwire)

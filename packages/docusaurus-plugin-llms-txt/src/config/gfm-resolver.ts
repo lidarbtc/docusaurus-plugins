@@ -12,9 +12,7 @@ import type { PluginOptions, MarkdownOptions } from '../types';
 /**
  * Resolve GFM configuration with defaults
  */
-export function resolveGfmConfig(
-  markdown: MarkdownOptions
-): MarkdownOptions {
+export function resolveGfmConfig(markdown: MarkdownOptions): MarkdownOptions {
   if (!markdown.remarkGfm) {
     return markdown;
   }
@@ -48,8 +46,7 @@ export function applyGfmConfiguration(options: PluginOptions): PluginOptions {
   if (
     !(
       markdown.remarkGfm === true ||
-      (typeof markdown.remarkGfm === 'object' &&
-        markdown.remarkGfm !== null)
+      (typeof markdown.remarkGfm === 'object' && markdown.remarkGfm !== null)
     )
   ) {
     return options;

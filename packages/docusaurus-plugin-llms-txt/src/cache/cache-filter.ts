@@ -128,12 +128,22 @@ export function filterCachedRoutesForProcessing(
 
   // Union of both configs
   const unionConfig: IncludeFilterConfig = {
-    includeDocs: (markdown.includeDocs ?? true) || (llmsTxt.includeDocs ?? true),
-    includeVersionedDocs: (markdown.includeVersionedDocs ?? true) || (llmsTxt.includeVersionedDocs ?? false),
-    includeBlog: (markdown.includeBlog ?? false) || (llmsTxt.includeBlog ?? false),
-    includePages: (markdown.includePages ?? false) || (llmsTxt.includePages ?? false),
-    includeGeneratedIndex: (markdown.includeGeneratedIndex ?? true) || (llmsTxt.includeGeneratedIndex ?? true),
-    excludeRoutes: [...(markdown.excludeRoutes ?? []), ...(llmsTxt.excludeRoutes ?? [])],
+    includeDocs:
+      (markdown.includeDocs ?? true) || (llmsTxt.includeDocs ?? true),
+    includeVersionedDocs:
+      (markdown.includeVersionedDocs ?? true) ||
+      (llmsTxt.includeVersionedDocs ?? false),
+    includeBlog:
+      (markdown.includeBlog ?? false) || (llmsTxt.includeBlog ?? false),
+    includePages:
+      (markdown.includePages ?? false) || (llmsTxt.includePages ?? false),
+    includeGeneratedIndex:
+      (markdown.includeGeneratedIndex ?? true) ||
+      (llmsTxt.includeGeneratedIndex ?? true),
+    excludeRoutes: [
+      ...(markdown.excludeRoutes ?? []),
+      ...(llmsTxt.excludeRoutes ?? []),
+    ],
   };
 
   return filterCachedRoutesByConfig(cachedRoutes, unionConfig, logger);

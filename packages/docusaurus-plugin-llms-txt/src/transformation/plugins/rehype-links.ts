@@ -149,11 +149,7 @@ function transformInternalLink(
   href: string,
   options: RehypeLinksOptions
 ): string {
-  const {
-    enableFiles = true,
-    relativePaths = true,
-    baseUrl = '',
-  } = options;
+  const { enableFiles = true, relativePaths = true, baseUrl = '' } = options;
 
   // Parse the URL to handle query params and hash fragments properly
   const parsed = parseLocalURLPath(href);

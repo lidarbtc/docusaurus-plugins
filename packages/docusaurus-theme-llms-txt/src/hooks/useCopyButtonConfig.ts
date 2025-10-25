@@ -56,10 +56,14 @@ export default function useCopyButtonConfig(
         buttonLabel: pluginConfig.buttonLabel ?? baseConfig.buttonLabel,
         display: {
           docs: pluginConfig.display?.docs ?? baseConfig.display.docs,
-          excludeRoutes: pluginConfig.display?.excludeRoutes ?? baseConfig.display.excludeRoutes,
+          excludeRoutes:
+            pluginConfig.display?.excludeRoutes ??
+            baseConfig.display.excludeRoutes,
         },
-        contentStrategy: pluginConfig.contentStrategy ?? baseConfig.contentStrategy,
-        viewMarkdown: pluginConfig.actions?.viewMarkdown ?? baseConfig.viewMarkdown,
+        contentStrategy:
+          pluginConfig.contentStrategy ?? baseConfig.contentStrategy,
+        viewMarkdown:
+          pluginConfig.actions?.viewMarkdown ?? baseConfig.viewMarkdown,
         chatGPT: {
           enabled: (() => {
             if (typeof pluginConfig.actions?.ai?.chatGPT === 'boolean') {

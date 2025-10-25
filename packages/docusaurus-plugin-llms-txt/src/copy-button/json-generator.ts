@@ -49,8 +49,7 @@ export async function generateCopyContentJson(
         hasMarkdown: Boolean(route.markdownFile),
         // Always include content selectors for HTML fallback extraction
         // Use route-specific selectors if defined, otherwise use defaults
-        contentSelectors:
-          route.contentSelectors ?? DEFAULT_CONTENT_SELECTORS,
+        contentSelectors: route.contentSelectors ?? DEFAULT_CONTENT_SELECTORS,
       };
     }
 
