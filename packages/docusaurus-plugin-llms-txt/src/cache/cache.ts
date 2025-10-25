@@ -131,9 +131,9 @@ export class CacheManager {
         this.config
       );
 
-      // Get content selectors from effective config (route-specific or base config)
-      // If effectiveConfig has explicit contentSelectors, use them
-      // Otherwise, use the markdown config contentSelectors which includes defaults
+      // Get content selectors from effective config (route-specific or
+      // base config). If effectiveConfig has explicit contentSelectors,
+      // use them. Otherwise, use markdown config contentSelectors.
       const markdownConfig = getMarkdownConfig(this.config);
       const contentSelectors =
         effectiveConfig.contentSelectors ?? markdownConfig.contentSelectors;

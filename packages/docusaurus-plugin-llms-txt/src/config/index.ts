@@ -186,7 +186,8 @@ export function getUiConfig(config: PluginOptions): Required<UiOptions> {
 }
 
 /**
- * Collect all attachments from config (global + section-specific) with their sectionIds
+ * Collect all attachments from config (global + section-specific) with
+ * their sectionIds
  * @internal
  */
 export function collectAllAttachments(

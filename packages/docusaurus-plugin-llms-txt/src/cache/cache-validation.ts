@@ -172,10 +172,12 @@ export async function hashFile(filePath: string): Promise<string> {
 export function calcConfigHash(options: Partial<PluginOptions>): string {
   // Collect all options that affect output generation (not just filtering)
   const hashableOptions = {
-    // Markdown file generation and processing options (affect file creation and transformation)
+    // Markdown file generation and processing options (affect file
+    // creation and transformation)
     markdown: options.markdown,
 
-    // llms.txt index options (affect what goes in llms.txt, structure, and attachments)
+    // llms.txt index options (affect what goes in llms.txt, structure,
+    // and attachments)
     llmsTxt: options.llmsTxt,
 
     // UI options (affect output features)

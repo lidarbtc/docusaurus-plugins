@@ -58,7 +58,8 @@ export async function coordinateProcessing(
   );
 
   if (isCliContext && cache.routes.length > 0) {
-    // CLI context: filter cached routes based on current config (union of generate+indexing)
+    // CLI context: filter cached routes based on current config
+    // (union of generate+indexing)
     const filteredCachedRoutes = filterCachedRoutesForProcessing(
       cache.routes,
       config,
@@ -81,7 +82,8 @@ export async function coordinateProcessing(
       logger.warn(`Excluded ${excludedCount} routes by current config`);
     }
   } else if (!isCliContext && cache.routes.length > 0) {
-    // Build context: filter both live routes and cache to ensure consistency (union of generate+indexing)
+    // Build context: filter both live routes and cache to ensure
+    // consistency (union of generate+indexing)
     const filteredCachedRoutes = filterCachedRoutesForProcessing(
       cache.routes,
       config,
@@ -143,7 +145,8 @@ export async function coordinateProcessing(
       if (processedPaths.has(route.path)) {
         // Find the updated route from processing
         const updatedRoute = cachedRoutes.find((r) => r.path === route.path);
-        // Preserve contentSelectors from the original route if not in updated route
+        // Preserve contentSelectors from the original route if not in
+        // updated route
         if (
           updatedRoute &&
           !updatedRoute.contentSelectors &&

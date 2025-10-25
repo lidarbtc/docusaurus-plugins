@@ -20,7 +20,7 @@ import type { ResolvedCopyPageContentOptions } from '../../../hooks';
 
 import styles from './styles.module.css';
 
-export interface DropdownMenuProps {
+interface DropdownMenuProps {
   isOpen: boolean;
   finalConfig: ResolvedCopyPageContentOptions;
   onAction: (action: string) => void;

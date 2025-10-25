@@ -29,7 +29,10 @@ export interface CopyPageContentOptions {
   readonly contentStrategy?: 'prefer-markdown' | 'html-only';
   /** Available actions in the dropdown menu */
   readonly actions?: {
-    /** Enable view markdown option (default: true) - only shows when markdown is available */
+    /**
+     * Enable view markdown option (default: true) - only shows when
+     * markdown is available
+     */
     readonly viewMarkdown?: boolean;
     /** AI integration options */
     readonly ai?: {

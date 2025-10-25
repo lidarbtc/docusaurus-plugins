@@ -151,7 +151,8 @@ export function shouldProcessRoute(
   route: PluginRouteConfig,
   options: PluginOptions
 ): boolean {
-  // For processing, we need to include routes that are in EITHER markdown OR llmsTxt
+  // For processing, we need to include routes that are in EITHER
+  // markdown OR llmsTxt
   const markdown = options.markdown ?? {};
   const llmsTxt = options.llmsTxt ?? {};
 

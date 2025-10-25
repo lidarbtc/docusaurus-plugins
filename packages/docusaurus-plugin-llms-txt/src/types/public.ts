@@ -104,7 +104,10 @@ export interface MarkdownOptions {
   readonly includeBlog?: boolean;
   /** Include standalone pages in markdown generation (default: false) */
   readonly includePages?: boolean;
-  /** Include generated category index pages in markdown generation (default: true) */
+  /**
+   * Include generated category index pages in markdown generation
+   * (default: true)
+   */
   readonly includeGeneratedIndex?: boolean;
   /** Exclude specific routes from markdown generation */
   readonly excludeRoutes?: readonly string[];
@@ -207,11 +210,16 @@ export interface CopyPageContentOptions {
     /** Exclude specific routes by path pattern */
     readonly excludeRoutes?: readonly string[];
   };
-  /** Strategy for what content to copy (default: 'prefer-markdown') */
+  /**
+   * Strategy for what content to copy (default: 'prefer-markdown')
+   */
   readonly contentStrategy?: 'prefer-markdown' | 'html-only';
   /** Available actions in the dropdown menu */
   readonly actions?: {
-    /** Enable view markdown option (default: true) - only shows when markdown is available */
+    /**
+     * Enable view markdown option (default: true) - only shows when
+     * markdown is available
+     */
     readonly viewMarkdown?: boolean;
     /** AI integration options */
     readonly ai?: {

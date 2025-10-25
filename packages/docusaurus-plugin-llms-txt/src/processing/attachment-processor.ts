@@ -87,15 +87,15 @@ export class AttachmentProcessor {
         let counter = 2;
         while (usedFileNames.has(outputFileName)) {
           outputFileName = `${baseName}-${counter}.md`;
-          counter++;
+          counter += 1;
         }
 
         // Warn about auto-numbered files (collision detected)
         if (counter > 2) {
           this.logger.warn(
             `Filename collision detected for "${baseName}.md". ` +
-            `Using "${outputFileName}" instead. ` +
-            `Consider setting a custom "fileName" for attachment: ${attachment.title}`
+              `Using "${outputFileName}" instead. ` +
+              `Consider setting a custom "fileName" for attachment: ${attachment.title}`
           );
         }
 

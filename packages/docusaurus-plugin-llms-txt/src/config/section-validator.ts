@@ -68,9 +68,9 @@ function validateSectionReferences(
   // Global route rules no longer reference sections directly
   // Section route validation is handled separately
 
-  // Note: Global attachments (passed as parameter) no longer have sectionId
-  // They will be assigned to an auto-generated section
-  // Section-specific attachments are validated within sections (no sectionId field)
+  // Note: Global attachments (passed as parameter) no longer have
+  // sectionId. They will be assigned to an auto-generated section.
+  // Section-specific attachments are validated within sections.
 
   if (invalidReferences.length > 0) {
     throw new Error(

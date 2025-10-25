@@ -285,8 +285,8 @@ export default function llmsTxtPlugin(
         // Get configuration groups
         const markdownConfig = getMarkdownConfig(config);
 
-        // Process attachments if configured before orchestrating processing
-        // Collect all attachments (global + section-specific) with their sectionIds
+        // Process attachments if configured before orchestrating processing.
+        // Collect all attachments (global + section-specific) with sectionIds
         let processedAttachments: ProcessedAttachment[] | undefined;
         const allAttachments = collectAllAttachments(config);
         if (allAttachments.length > 0) {

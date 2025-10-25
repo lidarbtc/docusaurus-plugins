@@ -16,7 +16,7 @@ import type { ResolvedCopyPageContentOptions } from '../../../hooks';
 
 import styles from './styles.module.css';
 
-export interface CopyButtonProps {
+interface CopyButtonProps {
   copyStatus: 'idle' | 'success' | 'error';
   finalConfig: ResolvedCopyPageContentOptions;
   isOpen: boolean;
