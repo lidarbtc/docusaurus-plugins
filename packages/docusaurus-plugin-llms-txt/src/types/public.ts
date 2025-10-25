@@ -241,8 +241,15 @@ export interface AttachmentFile {
   readonly title: string;
   /** Optional description */
   readonly description?: string;
-  /** Whether to include this attachment's content in llms-full.txt
-   * (default: true) */
+  /**
+   * Custom output filename (without extension)
+   * If not provided, uses source filename. Auto-numbered if collision.
+   */
+  readonly fileName?: string;
+  /**
+   * Whether to include this attachment's content in llms-full.txt
+   * (default: true)
+   */
   readonly includeInFullTxt?: boolean;
 }
 
@@ -403,6 +410,7 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
               source: Joi.string().required(),
               title: Joi.string().required(),
               description: Joi.string(),
+              fileName: Joi.string(),
               includeInFullTxt: Joi.boolean().default(true),
             })
           )
@@ -440,6 +448,7 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
           source: Joi.string().required(),
           title: Joi.string().required(),
           description: Joi.string(),
+          fileName: Joi.string(),
           includeInFullTxt: Joi.boolean().default(true),
         })
       )

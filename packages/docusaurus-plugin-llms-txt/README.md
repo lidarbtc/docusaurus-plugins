@@ -346,16 +346,18 @@ Include external text files in your output.
   source: './specs/openapi.yaml',
   title: 'API Specification',
   description: 'Complete OpenAPI 3.0 spec',
+  fileName: 'api-spec',  // Custom output filename (prevents collisions)
   includeInFullTxt: true
 }
 ```
 
-| Property           | Type      | Default | Description                            |
-| ------------------ | --------- | ------- | -------------------------------------- |
-| `source`           | `string`  | -       | File path relative to site root.       |
-| `title`            | `string`  | -       | Display name in llms.txt.              |
-| `description`      | `string`  | -       | Optional context about the file.       |
-| `includeInFullTxt` | `boolean` | `true`  | Include full content in llms-full.txt. |
+| Property           | Type      | Default | Description                                                                                      |
+| ------------------ | --------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `source`           | `string`  | -       | File path relative to site root.                                                                 |
+| `title`            | `string`  | -       | Display name in llms.txt.                                                                        |
+| `description`      | `string`  | -       | Optional context about the file.                                                                 |
+| `fileName`         | `string`  | -       | Custom output filename (without extension). If not provided, uses source filename. Auto-numbered if collision detected. |
+| `includeInFullTxt` | `boolean` | `true`  | Include full content in llms-full.txt.                                                           |
 
 #### OptionalLink
 
