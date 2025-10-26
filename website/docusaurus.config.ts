@@ -87,7 +87,7 @@ const config: Config = {
           siteTitle: 'My Docusaurus Plugins Collection',
           siteDescription: 'Documentation for Docusaurus plugins',
           autoSectionPosition: 1.5, // Auto-sections appear between api-docs (1) and dev-guides (2)
-          autoSectionDepth: 2,
+          autoSectionDepth: 1,
           
           sections: [
             {
