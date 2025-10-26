@@ -50,7 +50,40 @@ markdown optimized for AI consumption.
 ### Section Organization
 
 Content is organized into logical sections that help AI systems understand documentation structure.
-Sections can have custom names, descriptions, and route patterns for precise content grouping.
+You can define sections in two ways:
+
+#### Manual Sections
+
+Define sections explicitly with custom names, descriptions, and route patterns:
+
+```typescript
+sections: [
+  {
+    id: 'api-docs',
+    name: 'API Reference',
+    routes: [{ route: '/api/**' }]
+  }
+]
+```
+
+#### Auto-Generated Sections
+
+For routes not matching any manual section, the plugin auto-generates sections based on URL path segments. Use `autoSectionDepth` to control which path level becomes top-level sections:
+
+**With `autoSectionDepth: 1`** (group by first segment):
+- `/blog/post-1.md` → "Blog" section
+- `/blog/post-2.md` → "Blog" section
+- `/docs/intro.md` → "Docs" section
+
+**With `autoSectionDepth: 2`** (group by second segment):
+- `/docs/advanced/plugin.md` → "Advanced" section
+- `/docs/tutorial-basics/intro.md` → "Tutorial Basics" section
+- `/blog/post-1.md` → "Post 1" section (falls back to depth 1)
+
+Routes shallower than `autoSectionDepth` automatically fall back to their actual depth, ensuring all content is included.
+
+Documents within each section are sorted by **path hierarchy** (depth-first, then lexicographic),
+ensuring related content stays grouped together (e.g., `/api/methods/*` before `/api/guides/*`).
 
 ### Content Processing Pipeline
 
@@ -61,6 +94,31 @@ HTML → Content Extraction (CSS selectors) → HTML Processing (rehype) → Mar
 
 Use glob patterns like `/docs/**` or `/api/*` to filter and organize content. Routes determine both
 what gets processed and how it's organized in sections.
+
+### Default Excluded Routes
+
+The plugin automatically excludes common Docusaurus-generated pages from processing. These defaults
+apply to all three `excludeRoutes` options (`markdown`, `llmsTxt`, and `ui.copyPageContent.display`):
+
+- `/search` - Search page
+- `/404.html` - 404 error page
+- `/tags` - Global tags index
+- `/tags/**` - Individual tag pages
+- `/blog/tags` - Blog tags index
+- `/blog/tags/**` - Individual blog tag pages
+- `/blog/archive` - Blog archive page
+- `/blog/authors` - Blog authors index
+- `/blog/authors/**` - Individual author pages
+
+You can add your own patterns to any `excludeRoutes` array, which will be merged with these defaults:
+
+```typescript
+{
+  markdown: {
+    excludeRoutes: ['/admin/**', '/internal/**'], // Merged with defaults
+  },
+}
+```
 
 ## Installation
 
@@ -142,10 +200,11 @@ const config: Config = {
           siteTitle: 'My Documentation',
           siteDescription: 'Comprehensive documentation for developers',
 
-          // Control heading levels based on route depth
-          autoSectionDepth: 1, // depth-1 routes get H2, depth-2 get H3, etc.
+          // Auto-section organization
+          autoSectionDepth: 2, // Group by 2nd path segment (/docs/api/* → "Api" section)
+          autoSectionPosition: 10, // Auto-sections appear after positioned manual sections
 
-          // Section organization
+          // Manual section organization
           sections: [
             {
               id: 'getting-started',
@@ -223,7 +282,7 @@ Generate individual .md files for each page.
 | `includeBlog`                | `boolean`                   | ❌       | `false`                                                                                         | Include blog posts.                                                                                                                  |
 | `includePages`               | `boolean`                   | ❌       | `false`                                                                                         | Include standalone pages from `src/pages/`.                                                                                          |
 | `includeGeneratedIndex`      | `boolean`                   | ❌       | `true`                                                                                          | Include auto-generated category index pages.                                                                                         |
-| `excludeRoutes`              | `string[]`                  | ❌       | `[]`                                                                                            | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                                                   |
+| `excludeRoutes`              | `string[]`                  | ❌       | See [default excludes](#default-excluded-routes)                                                | Glob patterns to exclude routes from markdown generation. Defaults include common Docusaurus pages like `/search`, `/blog/tags/**`, `/blog/archive`, etc. Add your own patterns like `['/admin/**', '/internal/**']`. |
 | `contentSelectors`           | `string[]`                  | ❌       | `['.theme-doc-markdown', 'main .container .col', 'main .theme-doc-wrapper', 'article', 'main']` | CSS selectors to find main content. First match wins.                                                                                |
 | `routeRules`                 | [`RouteRule[]`](#routerule) | ❌       | `[]`                                                                                            | Override selectors for specific routes. See [RouteRule](#routerule).                                                                 |
 | `remarkStringify`            | `object`                    | ❌       | `{}`                                                                                            | Markdown formatting options. See [remark-stringify](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify#options). |
@@ -248,9 +307,9 @@ Generate and configure the llms.txt index file.
 | `includeBlog`           | `boolean`                                   | ❌       | `false`     | Include blog posts.                                                                                                |
 | `includePages`          | `boolean`                                   | ❌       | `false`     | Include standalone pages from `src/pages/`.                                                                        |
 | `includeGeneratedIndex` | `boolean`                                   | ❌       | `true`      | Include auto-generated category index pages.                                                                       |
-| `excludeRoutes`         | `string[]`                                  | ❌       | `[]`        | Glob patterns to exclude. Example: `['/admin/**', '/internal/**']`                                                 |
+| `excludeRoutes`         | `string[]`                                  | ❌       | See [default excludes](#default-excluded-routes) | Glob patterns to exclude routes from llms.txt. Defaults include `/search`, `/blog/tags/**`, etc. Add your own like `['/admin/**']`. |
 | `sections`              | [`SectionDefinition[]`](#sectiondefinition) | ❌       | `[]`        | Organize content into named sections. See [SectionDefinition](#sectiondefinition).                                 |
-| `autoSectionDepth`      | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                | ❌       | `1`         | Heading offset: `1`=routes use H2/H3/H4, `2`=routes use H3/H4/H5.                                                  |
+| `autoSectionDepth`      | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                | ❌       | `1`         | Path depth for auto-generated sections. `1`=group by first segment (`/blog/*` → "Blog"), `2`=group by second segment (`/docs/advanced/*` → "Advanced"). Routes shallower than this depth fall back to their actual depth. Only affects auto-generated sections; manual sections are unaffected. |
 | `autoSectionPosition`   | `number`                                    | ❌       | `undefined` | Position for auto-generated sections. `undefined`=after positioned sections, number=sort with positioned sections. |
 | `siteTitle`             | `string`                                    | ❌       | `''`        | Title for llms.txt header. Falls back to Docusaurus config if not set.                                             |
 | `siteDescription`       | `string`                                    | ❌       | `''`        | Description for llms.txt header.                                                                                   |
@@ -404,7 +463,7 @@ Configure the copy button feature (requires theme package).
 | `buttonLabel`           | `string`                           | ❌       | `'Copy Page'`       | Button text.                                                                                                                                                                                                          |
 | `display`               | `object`                           | ❌       | `{}`                | Control where button appears.                                                                                                                                                                                         |
 | `display.docs`          | `boolean`                          | ❌       | `true`              | Show on docs pages.                                                                                                                                                                                                   |
-| `display.excludeRoutes` | `string[]`                         | ❌       | `[]`                | Hide on specific routes (glob patterns).                                                                                                                                                                              |
+| `display.excludeRoutes` | `string[]`                         | ❌       | See [default excludes](#default-excluded-routes) | Hide copy button on specific routes. Defaults include `/search`, `/blog/tags/**`, etc. |
 | `contentStrategy`       | `'prefer-markdown' \| 'html-only'` | ❌       | `'prefer-markdown'` | Controls what content is copied. `'prefer-markdown'` copies markdown if available, falls back to HTML. `'html-only'` always copies HTML. Dropdown menu item shows "Copy Raw Markdown" or "Copy Raw HTML" accordingly. |
 | `actions`               | `object`                           | ❌       | `{}`                | Available actions in dropdown.                                                                                                                                                                                        |
 | `actions.viewMarkdown`  | `boolean`                          | ❌       | `true`              | Show "View Markdown" option in dropdown when markdown file exists. Independent of `contentStrategy`.                                                                                                                  |

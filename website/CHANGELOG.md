@@ -1,5 +1,14 @@
 # website
 
+## 0.0.1-alpha.1
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [85c2631]
+  - @signalwire/docusaurus-plugin-llms-txt@2.0.0-alpha.5
+  - @signalwire/docusaurus-theme-llms-txt@1.0.0-alpha.6
+
 ## 0.0.1-alpha.0
 
 ### Patch Changes

@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { VALIDATION_MESSAGES } from '../constants';
+import { DEFAULT_EXCLUDE_ROUTES, VALIDATION_MESSAGES } from '../constants';
 import { createConfigError } from '../errors';
 import { pluginOptionsSchema } from '../types';
 import { ensureLeadingSlash } from '../utils';
@@ -82,7 +82,10 @@ export function getMarkdownConfig(
     includeBlog: markdown.includeBlog ?? false,
     includePages: markdown.includePages ?? false,
     includeGeneratedIndex: markdown.includeGeneratedIndex ?? true,
-    excludeRoutes: markdown.excludeRoutes ?? [],
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(markdown.excludeRoutes ?? []),
+    ],
     // Content extraction and processing
     contentSelectors: markdown.contentSelectors ?? [],
     routeRules: markdown.routeRules ?? [],
@@ -117,7 +120,10 @@ export function getMarkdownIncludeConfig(config: PluginOptions): {
     includeBlog: markdown.includeBlog ?? false,
     includePages: markdown.includePages ?? false,
     includeGeneratedIndex: markdown.includeGeneratedIndex ?? true,
-    excludeRoutes: markdown.excludeRoutes ?? [],
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(markdown.excludeRoutes ?? []),
+    ],
   };
 }
 
@@ -137,7 +143,10 @@ export function getLlmsTxtConfig(
     includeBlog: llmsTxt.includeBlog ?? false,
     includePages: llmsTxt.includePages ?? false,
     includeGeneratedIndex: llmsTxt.includeGeneratedIndex ?? true,
-    excludeRoutes: llmsTxt.excludeRoutes ?? [],
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(llmsTxt.excludeRoutes ?? []),
+    ],
     // Structure and organization
     sections: llmsTxt.sections ?? [],
     siteTitle: llmsTxt.siteTitle ?? '',
@@ -170,7 +179,10 @@ export function getLlmsTxtIncludeConfig(config: PluginOptions): {
     includeBlog: llmsTxt.includeBlog ?? false,
     includePages: llmsTxt.includePages ?? false,
     includeGeneratedIndex: llmsTxt.includeGeneratedIndex ?? true,
-    excludeRoutes: llmsTxt.excludeRoutes ?? [],
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(llmsTxt.excludeRoutes ?? []),
+    ],
   };
 }
 

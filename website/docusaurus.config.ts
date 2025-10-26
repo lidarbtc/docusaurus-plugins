@@ -87,7 +87,8 @@ const config: Config = {
           siteTitle: 'My Docusaurus Plugins Collection',
           siteDescription: 'Documentation for Docusaurus plugins',
           autoSectionPosition: 1.5, // Auto-sections appear between api-docs (1) and dev-guides (2)
-
+          autoSectionDepth: 2,
+          
           sections: [
             {
               id: 'api-docs',
@@ -140,6 +141,35 @@ const config: Config = {
                   source: './test-files/advanced-guide.mdx',
                   title: 'Advanced Payment Processing',
                   description: 'Advanced patterns, security best practices, and optimization techniques',
+                },
+              ],
+              // Test subsections
+              subsections: [
+                {
+                  id: 'dev-guides-beginner',
+                  name: 'Beginner Guides',
+                  description: 'Guides for developers new to the platform',
+                  position: 2,
+                  attachments: [
+                    {
+                      source: './test-files/getting-started.md',
+                      title: 'Getting Started Guide',
+                      description: 'Quick start guide for new developers',
+                    },
+                  ],
+                },
+                {
+                  id: 'dev-guides-advanced',
+                  name: 'Advanced Guides',
+                  description: 'Advanced topics for experienced developers',
+                  position: 1,
+                  attachments: [
+                    {
+                      source: './test-files/advanced-guide.mdx',
+                      title: 'Advanced Payment Processing',
+                      description: 'Advanced patterns, security best practices, and optimization techniques',
+                    },
+                  ],
                 },
               ],
             }

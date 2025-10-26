@@ -35,16 +35,17 @@ export function renderTreeAsMarkdown(
 ): string {
   let md = '';
 
-  // Calculate heading level based on route depth
-  // autoSectionDepth is the base heading level added to route depth
-  // For example: autoSectionDepth=1 means depth-1 routes get H2 (1+1)
-  //              autoSectionDepth=2 means depth-1 routes get H3 (2+1)
+  // Calculate heading level based on tree hierarchy depth
+  // Top-level sections (direct children of root) are H2
+  // Their subsections (if defined) are H3, H4, etc.
   const calculateHeadingLevel = (relPath: string): number => {
-    // Count path segments (e.g., "api" or "api-docs" = 1, "docs/guide" = 2)
+    // Count path segments to determine tree hierarchy depth
+    // Single segment = top-level section (H2)
+    // Two segments = subsection (H3), etc.
     const segments = relPath.split('/').filter(Boolean);
-    const routeDepth = segments.length;
-    // Heading level = autoSectionDepth + routeDepth
-    return Math.min(autoSectionDepth + routeDepth, 6);
+    const hierarchyDepth = segments.length;
+    // Top-level sections get H2 (1 + 1), subsections get H3 (2 + 1), etc.
+    return Math.min(hierarchyDepth + 1, 6);
   };
 
   // Handle section heading and description

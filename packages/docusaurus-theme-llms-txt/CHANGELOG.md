@@ -1,5 +1,12 @@
 # @signalwire/docusaurus-theme-llms-txt
 
+## 1.0.0-alpha.6
+
+### Patch Changes
+
+- Organize links by path now in llms-txt
+- 85c2631: Fixed attachments filename bug
+
 ## 1.0.0-alpha.4
 
 ### Major Changes
@@ -9,9 +16,11 @@
 ### Patch Changes
 
 - Fix `contentStrategy` bug in dropdown menu and copy button:
-  - Dropdown menu now respects `contentStrategy` setting, showing "Copy Raw HTML" when set to `'html-only'` instead of incorrectly showing "Copy Raw Markdown"
+  - Dropdown menu now respects `contentStrategy` setting, showing "Copy Raw HTML" when set to
+    `'html-only'` instead of incorrectly showing "Copy Raw Markdown"
   - Dropdown menu icon changes dynamically (Markdown icon vs HTML icon) based on what will be copied
-  - "View Markdown" option remains available when markdown file exists, independent of `contentStrategy` (allows viewing source even when copying HTML)
+  - "View Markdown" option remains available when markdown file exists, independent of
+    `contentStrategy` (allows viewing source even when copying HTML)
   - Removed unused `hasMarkdown` prop from CopyButton component (only needed in DropdownMenu)
 
 - ec2e25b: Code cleanup and cache optimization:

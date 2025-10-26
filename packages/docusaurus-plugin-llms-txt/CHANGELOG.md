@@ -1,5 +1,12 @@
 # @signalwire/docusaurus-plugin-llms-txt
 
+## 2.0.0-alpha.5
+
+### Patch Changes
+
+- Organize links by path now in llms-txt
+- 85c2631: Fixed attachments filename bug
+
 ## 2.0.0-alpha.3
 
 ### Major Changes
@@ -8,11 +15,15 @@
 
 ### Patch Changes
 
-- Fix `contentStrategy` bug where dropdown menu displayed incorrect content type. When `contentStrategy: 'html-only'` is set, the dropdown now correctly shows "Copy Raw HTML" instead of "Copy Raw Markdown". The "View Markdown" option remains available when markdown exists, independent of `contentStrategy` setting.
+- Fix `contentStrategy` bug where dropdown menu displayed incorrect content type. When
+  `contentStrategy: 'html-only'` is set, the dropdown now correctly shows "Copy Raw HTML" instead of
+  "Copy Raw Markdown". The "View Markdown" option remains available when markdown exists,
+  independent of `contentStrategy` setting.
 
 - Updated ambient type declarations to remove unused `hasMarkdown` prop from CopyButton component.
 
-- Updated README documentation to clarify `contentStrategy` behavior and `viewMarkdown` independence.
+- Updated README documentation to clarify `contentStrategy` behavior and `viewMarkdown`
+  independence.
 
 - ec2e25b: Code cleanup and cache optimization:
   - Remove dead code (className prop, normalizePathname export, CopyContentData export)

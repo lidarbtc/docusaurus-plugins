@@ -6,7 +6,7 @@
  */
 
 import { getLlmsTxtIncludeConfig } from '../config';
-import { CONTENT_TYPES } from '../constants';
+import { CONTENT_TYPES, DEFAULT_EXCLUDE_ROUTES } from '../constants';
 import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 
 import type { IncludeFilterConfig } from '../discovery/content-classifier';
@@ -141,6 +141,7 @@ export function filterCachedRoutesForProcessing(
       (markdown.includeGeneratedIndex ?? true) ||
       (llmsTxt.includeGeneratedIndex ?? true),
     excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
       ...(markdown.excludeRoutes ?? []),
       ...(llmsTxt.excludeRoutes ?? []),
     ],

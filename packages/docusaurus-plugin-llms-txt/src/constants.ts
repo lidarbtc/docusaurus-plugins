@@ -173,6 +173,23 @@ export const ROOT_ROUTE_PATH = '/' as const;
 /** @internal */
 export const INDEX_ROUTE_PATH = '/index.md' as const;
 
+/**
+ * Default routes to exclude from processing across all features
+ * These are common Docusaurus-generated pages that typically don't need
+ * markdown files, shouldn't appear in llms.txt, or show a copy button
+ */
+export const DEFAULT_EXCLUDE_ROUTES = [
+  '/search', // Search page
+  '/404.html', // 404 page
+  '/tags', // Global tags index
+  '/tags/**', // Individual tag pages
+  '/blog/tags', // Blog tags index
+  '/blog/tags/**', // Individual blog tag pages
+  '/blog/archive', // Blog archive
+  '/blog/authors', // Blog authors index
+  '/blog/authors/**', // Individual author pages
+] as const;
+
 // Default content selectors - public for user reference
 export const DEFAULT_CONTENT_SELECTORS = [
   '.theme-doc-markdown',

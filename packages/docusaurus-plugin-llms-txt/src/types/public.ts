@@ -7,7 +7,11 @@
 
 import { Joi } from '@docusaurus/utils-validation';
 
-import { DEFAULT_CONTENT_SELECTORS, PLUGIN_NAME } from '../constants';
+import {
+  DEFAULT_CONTENT_SELECTORS,
+  DEFAULT_EXCLUDE_ROUTES,
+  PLUGIN_NAME,
+} from '../constants';
 
 import type { ReportingSeverity } from '@docusaurus/types';
 import type { Options as RemarkGfmOptions } from 'remark-gfm';
@@ -359,7 +363,9 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
     includeBlog: Joi.boolean().default(false),
     includePages: Joi.boolean().default(false),
     includeGeneratedIndex: Joi.boolean().default(true),
-    excludeRoutes: Joi.array().items(Joi.string()).default([]),
+    excludeRoutes: Joi.array()
+      .items(Joi.string())
+      .default([...DEFAULT_EXCLUDE_ROUTES]),
     // Content extraction and processing
     contentSelectors: Joi.array()
       .items(Joi.string())
@@ -394,7 +400,9 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
     includeBlog: Joi.boolean().default(false),
     includePages: Joi.boolean().default(false),
     includeGeneratedIndex: Joi.boolean().default(true),
-    excludeRoutes: Joi.array().items(Joi.string()).default([]),
+    excludeRoutes: Joi.array()
+      .items(Joi.string())
+      .default([...DEFAULT_EXCLUDE_ROUTES]),
     // Structure and organization
     sections: Joi.array().items(
       Joi.object({
@@ -472,7 +480,9 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
           buttonLabel: Joi.string().default('Copy Page'),
           display: Joi.object({
             docs: Joi.boolean().default(true),
-            excludeRoutes: Joi.array().items(Joi.string()).default([]),
+            excludeRoutes: Joi.array()
+      .items(Joi.string())
+      .default([...DEFAULT_EXCLUDE_ROUTES]),
           }).default({}),
           contentStrategy: Joi.string()
             .valid('prefer-markdown', 'html-only')

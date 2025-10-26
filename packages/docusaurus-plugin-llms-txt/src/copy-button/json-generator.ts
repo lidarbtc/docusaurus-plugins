@@ -9,7 +9,10 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 
-import { DEFAULT_CONTENT_SELECTORS } from '../constants';
+import {
+  DEFAULT_CONTENT_SELECTORS,
+  DEFAULT_EXCLUDE_ROUTES,
+} from '../constants';
 import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 
 import type { CachedRouteInfo, Logger, PluginOptions } from '../types';
@@ -26,7 +29,10 @@ export async function generateCopyContentJson(
       typeof config.ui?.copyPageContent === 'object'
         ? config.ui.copyPageContent
         : {};
-    const excludeRoutes = uiConfig.display?.excludeRoutes ?? [];
+    const excludeRoutes = [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(uiConfig.display?.excludeRoutes ?? []),
+    ];
 
     // Create exclusion matcher for server-side filtering
     const isExcluded = createExclusionMatcher(excludeRoutes);

@@ -3632,7 +3632,7 @@
   integrity sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==
 
 "@signalwire/docusaurus-plugin-llms-txt@file:packages/docusaurus-plugin-llms-txt":
-  version "2.0.0-alpha.3"
+  version "2.0.0-alpha.5"
   dependencies:
     fs-extra "^11.0.0"
     hast-util-select "^6.0.4"
@@ -3648,7 +3648,7 @@
     unist-util-visit "^5"
 
 "@signalwire/docusaurus-theme-llms-txt@file:packages/docusaurus-theme-llms-txt":
-  version "1.0.0-alpha.4"
+  version "1.0.0-alpha.6"
   dependencies:
     "@docusaurus/core" "^3.0.0"
     "@docusaurus/theme-common" "^3.0.0"
