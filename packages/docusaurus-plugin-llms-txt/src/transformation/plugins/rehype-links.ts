@@ -167,11 +167,10 @@ function transformInternalLink(
   // Ensure it starts with / for absolute path from site root
   pathname = ensureLeadingSlash(pathname);
 
-  // Remove any existing file extensions and trailing slashes for consistent
-  // processing
+  // Remove any existing file extensions for consistent processing
   pathname = pathname.replace(HTML_OR_MD_EXTENSION_REGEX, '');
 
-  // Remove trailing slashes (except for root path)
+  // Remove trailing slashes before route resolution (except for root path)
   if (pathname !== '/' && pathname.endsWith('/')) {
     pathname = pathname.slice(0, -1);
   }
@@ -180,6 +179,7 @@ function transformInternalLink(
   const resolvedPathname = resolvePathname(pathname, options.routeLookup);
 
   // Use our URL formatting utility for the pathname
+  // formatUrl will handle trailing slashes when adding .md extension
   const transformedPathname = formatUrl(
     resolvedPathname,
     { relativePaths, enableFiles },
