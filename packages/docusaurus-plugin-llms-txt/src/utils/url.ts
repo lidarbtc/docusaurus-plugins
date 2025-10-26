@@ -97,9 +97,10 @@ export function formatUrl(
     targetPath = ensureLeadingSlash(markdownFile);
   } else if (enableFiles) {
     // Remove trailing slash before adding .md extension to prevent /.md
-    const pathForExtension = targetPath.endsWith('/') && targetPath !== '/'
-      ? targetPath.slice(0, -1)
-      : targetPath;
+    const pathForExtension =
+      targetPath.endsWith('/') && targetPath !== '/'
+        ? targetPath.slice(0, -1)
+        : targetPath;
     // Add .md extension to route path
     targetPath = pathForExtension === '/' ? INDEX_MD : `${pathForExtension}.md`;
   }
@@ -127,7 +128,10 @@ export function formatUrl(
     const baseForComparison = basePathname.replace(/\/$/, '');
 
     // If targetPath doesn't start with baseUrl pathname, prepend it
-    if (baseForComparison !== '/' && !targetPath.startsWith(baseForComparison)) {
+    if (
+      baseForComparison !== '/' &&
+      !targetPath.startsWith(baseForComparison)
+    ) {
       return normalizeUrl([basePathname, targetPath]);
     }
   }

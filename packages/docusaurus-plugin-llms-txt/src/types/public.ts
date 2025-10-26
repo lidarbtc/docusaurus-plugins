@@ -481,8 +481,8 @@ export const pluginOptionsSchema = Joi.object<PluginOptions>({
           display: Joi.object({
             docs: Joi.boolean().default(true),
             excludeRoutes: Joi.array()
-      .items(Joi.string())
-      .default([...DEFAULT_EXCLUDE_ROUTES]),
+              .items(Joi.string())
+              .default([...DEFAULT_EXCLUDE_ROUTES]),
           }).default({}),
           contentStrategy: Joi.string()
             .valid('prefer-markdown', 'html-only')
