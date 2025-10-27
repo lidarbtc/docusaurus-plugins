@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { flattenRoutes } from '@docusaurus/utils';
+import { flattenRoutes, normalizeUrl } from '@docusaurus/utils';
 import * as fs from 'fs-extra';
 
 import { registerLlmsTxt, registerLlmsTxtClean } from './cli/command';
@@ -222,7 +222,10 @@ export default function llmsTxtPlugin(
 
       // Only add URL if copy content is enabled
       if (uiConfig.copyPageContent !== false) {
-        globalData.copyContentDataUrl = `/assets/llms-txt/copy-content-data.${buildTimestamp}.json?v=${Date.now()}`;
+        // Construct data URL with baseUrl for proper routing
+        const dataPath = `/assets/llms-txt/copy-content-data.${buildTimestamp}.json`;
+        const dataUrl = normalizeUrl([context.siteConfig.baseUrl, dataPath]);
+        globalData.copyContentDataUrl = `${dataUrl}?v=${Date.now()}`;
       }
 
       setGlobalData(globalData);

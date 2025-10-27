@@ -7,16 +7,41 @@
 import { useState } from 'react';
 
 import { useLocation } from '@docusaurus/router';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 import {
-  constructMarkdownUrl,
-  constructHtmlUrl,
   constructFullUrl,
+  constructMarkdownUrl,
   type SiteConfig,
 } from '../utils/copyButton';
-import { extractHtmlContent } from '../utils/htmlExtractor';
 
 import type { ResolvedCopyPageContentOptions } from './useCopyButtonConfig';
+
+/**
+ * Extract content from current DOM using CSS selectors
+ * Returns text content from the first matching element
+ */
+function extractContentFromDom(selectors: readonly string[]): string | null {
+  // Try each selector in order
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      // Return the text content of the first matching element
+      return element.textContent || null;
+    }
+  }
+
+  // Fallback: try to find main content areas
+  const fallbackSelectors = ['main', '.main-wrapper', '#__docusaurus'];
+  for (const selector of fallbackSelectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      return element.textContent || null;
+    }
+  }
+
+  return null;
+}
 
 export default function useCopyActions(
   finalConfig: ResolvedCopyPageContentOptions,
@@ -32,7 +57,11 @@ export default function useCopyActions(
     'idle'
   );
   const location = useLocation();
+  // Docusaurus strips baseUrl from location.pathname, so we use it directly
+  // for relative fetches (which are served with baseUrl by the server)
   const pathname = location.pathname;
+  // For constructing full absolute URLs, we need to add baseUrl back
+  const pathnameWithBase = useBaseUrl(pathname);
 
   const handleAction = async (action: string) => {
     setIsOpen(false);
@@ -50,7 +79,8 @@ export default function useCopyActions(
 
         if (shouldFetchMarkdown) {
           // Fetch markdown content directly
-          const markdownUrl = constructMarkdownUrl(pathname);
+          // Use pathnameWithBase for proper routing with baseUrl
+          const markdownUrl = constructMarkdownUrl(pathnameWithBase);
           textPromise = fetch(markdownUrl)
             .then((response) => {
               if (!response.ok) {
@@ -60,25 +90,21 @@ export default function useCopyActions(
             })
             .then((text) => new Blob([text], { type: 'text/plain' }));
         } else {
-          // No markdown available - fetch and extract HTML content
-          const htmlUrl = constructHtmlUrl(pathname, siteConfig?.trailingSlash);
-          console.debug('No markdown available, fetching HTML content');
+          // No markdown available - extract content from current DOM
+          // We're already on the HTML page, so just query the DOM directly
+          console.debug('No markdown available, extracting from current DOM');
 
-          textPromise = fetch(htmlUrl)
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error(`Failed to fetch HTML: ${response.status}`);
-              }
-              return response.text();
+          // Extract content directly from document using selectors
+          const extracted =
+            contentSelectors && contentSelectors.length > 0
+              ? extractContentFromDom(contentSelectors)
+              : document.body.innerText;
+
+          textPromise = Promise.resolve(
+            new Blob([extracted || document.body.innerText], {
+              type: 'text/plain',
             })
-            .then((html) => {
-              // Extract content using selectors
-              const extracted =
-                contentSelectors && contentSelectors.length > 0
-                  ? extractHtmlContent(html, contentSelectors)
-                  : null;
-              return new Blob([extracted || html], { type: 'text/plain' });
-            });
+          );
         }
 
         // Create ClipboardItem with the promise
@@ -103,16 +129,21 @@ export default function useCopyActions(
         setCopyStatus('error');
         setTimeout(() => setCopyStatus('idle'), 3000);
       }
-    } else if (action === 'viewMarkdown' && siteConfig) {
-      // Open markdown file in new tab
-      const markdownUrl = constructMarkdownUrl(pathname);
-      const fullUrl = `${siteConfig.url}${siteConfig.baseUrl}${markdownUrl.startsWith('/') ? markdownUrl.slice(1) : markdownUrl}`;
-      window.open(fullUrl, '_blank');
+    } else if (action === 'viewMarkdown') {
+      // Open markdown file in new tab using relative URL
+      // Use pathnameWithBase which includes baseUrl for proper routing
+      const markdownUrl = constructMarkdownUrl(pathnameWithBase);
+      window.open(markdownUrl, '_blank');
       setCopyStatus('success');
       setTimeout(() => setCopyStatus('idle'), 2000);
     } else if (action === 'openChatGPT' && siteConfig) {
       // Open ChatGPT with content and search hints enabled
-      const fullUrl = constructFullUrl(pathname, siteConfig, hasMarkdown);
+      // Use pathnameWithBase which includes baseUrl for full URL construction
+      const fullUrl = constructFullUrl(
+        pathnameWithBase,
+        siteConfig,
+        hasMarkdown
+      );
       const encodedPrompt = encodeURIComponent(
         `${finalConfig.chatGPT.prompt} ${fullUrl}`
       );
@@ -122,7 +153,12 @@ export default function useCopyActions(
       setTimeout(() => setCopyStatus('idle'), 2000);
     } else if (action === 'openClaude' && siteConfig) {
       // Open Claude with content
-      const fullUrl = constructFullUrl(pathname, siteConfig, hasMarkdown);
+      // Use pathnameWithBase which includes baseUrl for full URL construction
+      const fullUrl = constructFullUrl(
+        pathnameWithBase,
+        siteConfig,
+        hasMarkdown
+      );
       const encodedPrompt = encodeURIComponent(
         `${finalConfig.claude.prompt} ${fullUrl}`
       );

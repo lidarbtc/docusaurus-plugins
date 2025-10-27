@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import clsx from 'clsx';
 
 import { useLocation } from '@docusaurus/router';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import { usePluginData } from '@docusaurus/useGlobalData';
 
 import CopyButton from '@theme/CopyPageContent/CopyButton';
@@ -34,6 +35,8 @@ export default function CopyPageContent({
 }: CopyPageContentProps): React.JSX.Element | null {
   const location = useLocation();
   const pathname = location.pathname;
+  // JSON keys include baseUrl, so we need to use pathnameWithBase for lookup
+  const pathnameWithBase = useBaseUrl(pathname);
 
   // Get plugin configuration from global data
   const pluginData = usePluginData('docusaurus-plugin-llms-txt', undefined) as
@@ -51,7 +54,8 @@ export default function CopyPageContent({
   const finalConfig = useCopyButtonConfig(pluginConfig);
 
   // Get route data for current path
-  const routeData = copyContentData?.[pathname];
+  // Use pathnameWithBase because JSON keys include baseUrl
+  const routeData = copyContentData?.[pathnameWithBase];
   const shouldDisplay =
     typeof routeData === 'object' ? routeData.shouldDisplay : false;
   const hasMarkdown =

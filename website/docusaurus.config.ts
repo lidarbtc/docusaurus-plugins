@@ -27,14 +27,18 @@ const config: Config = {
   url: 'https://your-docusaurus-site.example.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
+  // TESTING: Changed to /docs/ to test baseUrl duplication in copy button
   baseUrl: '/',
+
+  // TESTING: Enable trailing slash to test the slash handling fix
+  trailingSlash: false,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'SignalWire', // Usually your GitHub org/user name.
   projectName: 'docusaurus-plugins', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you

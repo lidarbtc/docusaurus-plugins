@@ -70,9 +70,13 @@ export function constructHtmlUrl(
 
 /**
  * Construct full absolute URL for AI prompts
+ * Note: pathname should already include baseUrl
+ *       (use useBaseUrl hook in React components)
  * Examples:
- *   With markdown: "/api/intro" → "https://site.com/baseUrl/api/intro.md"
- *   Without markdown: "/api/intro" → "https://site.com/baseUrl/api/intro"
+ *   With markdown: "/baseUrl/api/intro" →
+ *     "https://site.com/baseUrl/api/intro.md"
+ *   Without markdown: "/baseUrl/api/intro" →
+ *     "https://site.com/baseUrl/api/intro"
  */
 export function constructFullUrl(
   pathname: string,
@@ -82,18 +86,10 @@ export function constructFullUrl(
   // If markdown is available, use .md extension, otherwise use the regular path
   const contentPath = hasMarkdown ? constructMarkdownUrl(pathname) : pathname;
 
-  // Remove leading slash from contentPath for joining
-  const pathWithoutSlash = contentPath.startsWith('/')
-    ? contentPath.slice(1)
-    : contentPath;
-
-  // Build full URL: siteUrl + baseUrl + contentPath
+  // Build full URL: siteUrl + contentPath (pathname already includes baseUrl)
   const siteUrl = siteConfig.url.endsWith('/')
     ? siteConfig.url.slice(0, -1)
     : siteConfig.url;
-  const baseUrl = siteConfig.baseUrl.startsWith('/')
-    ? siteConfig.baseUrl
-    : `/${siteConfig.baseUrl}`;
 
-  return `${siteUrl}${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}${pathWithoutSlash}`;
+  return `${siteUrl}${contentPath}`;
 }
