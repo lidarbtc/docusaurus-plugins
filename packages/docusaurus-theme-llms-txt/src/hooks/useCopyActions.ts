@@ -19,15 +19,15 @@ import type { ResolvedCopyPageContentOptions } from './useCopyButtonConfig';
 
 /**
  * Extract content from current DOM using CSS selectors
- * Returns text content from the first matching element
+ * Returns HTML content from the first matching element
  */
 function extractContentFromDom(selectors: readonly string[]): string | null {
   // Try each selector in order
   for (const selector of selectors) {
     const element = document.querySelector(selector);
     if (element) {
-      // Return the text content of the first matching element
-      return element.textContent || null;
+      // Return the HTML content of the first matching element
+      return element.innerHTML || null;
     }
   }
 
@@ -36,7 +36,7 @@ function extractContentFromDom(selectors: readonly string[]): string | null {
   for (const selector of fallbackSelectors) {
     const element = document.querySelector(selector);
     if (element) {
-      return element.textContent || null;
+      return element.innerHTML || null;
     }
   }
 
@@ -98,10 +98,10 @@ export default function useCopyActions(
           const extracted =
             contentSelectors && contentSelectors.length > 0
               ? extractContentFromDom(contentSelectors)
-              : document.body.innerText;
+              : document.body.innerHTML;
 
           textPromise = Promise.resolve(
-            new Blob([extracted || document.body.innerText], {
+            new Blob([extracted || document.body.innerHTML], {
               type: 'text/plain',
             })
           );
