@@ -8,7 +8,7 @@
 import { createMatcher } from '@docusaurus/utils';
 
 import { ensureLeadingSlash, generateSectionId } from '../utils';
-import { getStructureConfig, getProcessingConfig } from './index';
+import { getLlmsTxtConfig, getMarkdownConfig } from './index';
 
 import type {
   RouteRule,
@@ -107,11 +107,11 @@ export function resolveRouteConfiguration(
   baseConfig: PluginOptions
 ): EffectiveConfig {
   // Get all config groups using the new structure
-  const structureConfig = getStructureConfig(baseConfig);
-  const processingConfig = getProcessingConfig(baseConfig);
+  const llmsTxtConfig = getLlmsTxtConfig(baseConfig);
+  const markdownConfig = getMarkdownConfig(baseConfig);
 
   // 1. Check section routes first (most specific)
-  const sectionMatch = findMatchingSectionRoute(path, structureConfig.sections);
+  const sectionMatch = findMatchingSectionRoute(path, llmsTxtConfig.sections);
   if (sectionMatch) {
     return {
       ...baseConfig,
@@ -126,7 +126,7 @@ export function resolveRouteConfiguration(
   // 2. Check global rules (less specific)
   const globalMatch = findMostSpecificGlobalRule(
     path,
-    processingConfig.routeRules
+    markdownConfig.routeRules
   );
   if (globalMatch) {
     return {

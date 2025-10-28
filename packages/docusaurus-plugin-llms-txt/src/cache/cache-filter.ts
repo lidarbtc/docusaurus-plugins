@@ -5,22 +5,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { getIncludeConfig } from '../config';
-import { CONTENT_TYPES } from '../constants';
+import { getLlmsTxtIncludeConfig } from '../config';
+import { CONTENT_TYPES, DEFAULT_EXCLUDE_ROUTES } from '../constants';
 import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 
+import type { IncludeFilterConfig } from '../discovery/content-classifier';
 import type { CachedRouteInfo, PluginOptions, Logger } from '../types';
 
 /**
- * Filter cached routes based on current plugin configuration
- * This provides unified filtering logic for both build and CLI contexts
+ * Filter cached routes based on include configuration
+ * @internal
  */
-export function filterCachedRoutesForConfig(
+export function filterCachedRoutesByConfig(
   cachedRoutes: readonly CachedRouteInfo[],
-  config: PluginOptions,
+  includeConfig: IncludeFilterConfig,
   logger?: Logger
 ): CachedRouteInfo[] {
-  const includeConfig = getIncludeConfig(config);
   const isExcludedByPattern = createExclusionMatcher(
     includeConfig.excludeRoutes
   );
@@ -102,6 +102,66 @@ export function filterCachedRoutesForConfig(
 }
 
 /**
+ * Filter cached routes for indexing (llms.txt generation)
+ * Uses indexing configuration
+ */
+export function filterCachedRoutesForIndexing(
+  cachedRoutes: readonly CachedRouteInfo[],
+  config: PluginOptions,
+  logger?: Logger
+): CachedRouteInfo[] {
+  const includeConfig = getLlmsTxtIncludeConfig(config);
+  return filterCachedRoutesByConfig(cachedRoutes, includeConfig, logger);
+}
+
+/**
+ * Filter cached routes for processing (union of generate and indexing)
+ * Uses the union of both configs to ensure we have everything needed
+ */
+export function filterCachedRoutesForProcessing(
+  cachedRoutes: readonly CachedRouteInfo[],
+  config: PluginOptions,
+  logger?: Logger
+): CachedRouteInfo[] {
+  const markdown = config.markdown ?? {};
+  const llmsTxt = config.llmsTxt ?? {};
+
+  // Union of both configs
+  const unionConfig: IncludeFilterConfig = {
+    includeDocs:
+      (markdown.includeDocs ?? true) || (llmsTxt.includeDocs ?? true),
+    includeVersionedDocs:
+      (markdown.includeVersionedDocs ?? true) ||
+      (llmsTxt.includeVersionedDocs ?? false),
+    includeBlog:
+      (markdown.includeBlog ?? false) || (llmsTxt.includeBlog ?? false),
+    includePages:
+      (markdown.includePages ?? false) || (llmsTxt.includePages ?? false),
+    includeGeneratedIndex:
+      (markdown.includeGeneratedIndex ?? true) ||
+      (llmsTxt.includeGeneratedIndex ?? true),
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(markdown.excludeRoutes ?? []),
+      ...(llmsTxt.excludeRoutes ?? []),
+    ],
+  };
+
+  return filterCachedRoutesByConfig(cachedRoutes, unionConfig, logger);
+}
+
+/**
+ * @deprecated Use filterCachedRoutesForIndexing or filterCachedRoutesForProcessing
+ */
+export function filterCachedRoutesForConfig(
+  cachedRoutes: readonly CachedRouteInfo[],
+  config: PluginOptions,
+  logger?: Logger
+): CachedRouteInfo[] {
+  return filterCachedRoutesForIndexing(cachedRoutes, config, logger);
+}
+
+/**
  * Check if cache-based filtering would produce different results than
  * current cache
  * This helps determine if the CLI needs to warn about config changes
@@ -115,7 +175,7 @@ export function wouldFilteringChangeCachedRoutes(
   filteredCount: number;
   changeReason?: string;
 } {
-  const filteredRoutes = filterCachedRoutesForConfig(cachedRoutes, config);
+  const filteredRoutes = filterCachedRoutesForIndexing(cachedRoutes, config);
   const wouldChange = filteredRoutes.length !== cachedRoutes.length;
 
   let changeReason: string | undefined;

@@ -113,10 +113,10 @@ function isExcludedLink(href: string, options: RehypeLinksOptions): boolean {
  * Check if link transformation should be skipped entirely
  */
 function shouldSkipLinkTransformation(options: RehypeLinksOptions): boolean {
-  const { enableMarkdownFiles = true, relativePaths = true } = options;
+  const { enableFiles = true, relativePaths = true } = options;
   // If relative paths are enabled and markdown files are disabled,
   // skip processing as links don't need transformation
-  return relativePaths && !enableMarkdownFiles;
+  return relativePaths && !enableFiles;
 }
 
 /**
@@ -134,7 +134,7 @@ function getExcludedLinkOptions(
   if (!relativePaths) {
     return {
       ...options,
-      enableMarkdownFiles: false, // Force no .md extension for excluded links
+      enableFiles: false, // Force no .md extension for excluded links
     };
   }
 
@@ -149,11 +149,7 @@ function transformInternalLink(
   href: string,
   options: RehypeLinksOptions
 ): string {
-  const {
-    enableMarkdownFiles = true,
-    relativePaths = true,
-    baseUrl = '',
-  } = options;
+  const { enableFiles = true, relativePaths = true, baseUrl = '' } = options;
 
   // Parse the URL to handle query params and hash fragments properly
   const parsed = parseLocalURLPath(href);
@@ -171,11 +167,10 @@ function transformInternalLink(
   // Ensure it starts with / for absolute path from site root
   pathname = ensureLeadingSlash(pathname);
 
-  // Remove any existing file extensions and trailing slashes for consistent
-  // processing
+  // Remove any existing file extensions for consistent processing
   pathname = pathname.replace(HTML_OR_MD_EXTENSION_REGEX, '');
 
-  // Remove trailing slashes (except for root path)
+  // Remove trailing slashes before route resolution (except for root path)
   if (pathname !== '/' && pathname.endsWith('/')) {
     pathname = pathname.slice(0, -1);
   }
@@ -184,9 +179,10 @@ function transformInternalLink(
   const resolvedPathname = resolvePathname(pathname, options.routeLookup);
 
   // Use our URL formatting utility for the pathname
+  // formatUrl will handle trailing slashes when adding .md extension
   const transformedPathname = formatUrl(
     resolvedPathname,
-    { relativePaths, enableMarkdownFiles },
+    { relativePaths, enableFiles },
     baseUrl
   );
 
@@ -237,10 +233,10 @@ function processAnchorElement(
  * Rehype plugin that transforms internal links based on plugin configuration.
  *
  * This plugin automatically determines when to run:
- * - If relativePaths=true AND enableMarkdownFiles=false → plugin disabled
+ * - If relativePaths=true AND enableFiles=false → plugin disabled
  * - If relativePaths=false → prepend baseUrl to internal links
- * - If enableMarkdownFiles=true → append .md to internal links
- * - If relativePaths=false AND enableMarkdownFiles=true → do both
+ * - If enableFiles=true → append .md to internal links
+ * - If relativePaths=false AND enableFiles=true → do both
  *
  * Special handling for excluded links:
  * - If relativePaths=false → excluded links get baseUrl but NO .md extension

@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { getIncludeConfig } from '../config';
 import {
   DOCUSAURUS_BLOG_PLUGIN,
   DOCUSAURUS_PAGES_PLUGIN,
@@ -15,6 +14,18 @@ import {
 
 import type { PluginOptions } from '../types';
 import type { PluginRouteConfig } from '@docusaurus/types';
+
+/**
+ * Generic include configuration for filtering
+ */
+export interface IncludeFilterConfig {
+  includeDocs: boolean;
+  includeVersionedDocs: boolean;
+  includeBlog: boolean;
+  includePages: boolean;
+  includeGeneratedIndex: boolean;
+  excludeRoutes: readonly string[];
+}
 
 /**
  * Classify a route by its plugin type, with fallback heuristics for routes
@@ -70,29 +81,28 @@ function classifyRouteByHeuristics(route: PluginRouteConfig): ContentType {
 }
 
 /**
- * Determines if a route should be processed based on plugin configuration
+ * Determines if a route should be included based on filter configuration
  * @internal
  */
-export function shouldProcessRoute(
+export function shouldIncludeRoute(
   route: PluginRouteConfig,
-  options: PluginOptions
+  filterConfig: IncludeFilterConfig
 ): boolean {
-  const includeConfig = getIncludeConfig(options);
   const routeType = classifyRoute(route);
 
   // First check if this content type should be included
   let shouldIncludeType = false;
   switch (routeType) {
     case CONTENT_TYPES.BLOG:
-      shouldIncludeType = includeConfig.includeBlog;
+      shouldIncludeType = filterConfig.includeBlog;
       break;
     case CONTENT_TYPES.PAGES:
-      shouldIncludeType = includeConfig.includePages;
+      shouldIncludeType = filterConfig.includePages;
       break;
     case CONTENT_TYPES.DOCS:
     case CONTENT_TYPES.UNKNOWN:
     default:
-      shouldIncludeType = includeConfig.includeDocs;
+      shouldIncludeType = filterConfig.includeDocs;
       break;
   }
 
@@ -103,7 +113,7 @@ export function shouldProcessRoute(
   // For docs routes, check versioned docs filtering
   if (
     (routeType === CONTENT_TYPES.DOCS || routeType === CONTENT_TYPES.UNKNOWN) &&
-    includeConfig.includeVersionedDocs === false
+    filterConfig.includeVersionedDocs === false
   ) {
     // Check if this is a versioned docs route (not current version)
     const isVersionedRoute =
@@ -120,7 +130,7 @@ export function shouldProcessRoute(
   }
 
   // Check if this is a generated category index page
-  if (includeConfig.includeGeneratedIndex === false) {
+  if (filterConfig.includeGeneratedIndex === false) {
     // Generated index pages have a categoryGeneratedIndex prop
     if (route.props?.categoryGeneratedIndex !== undefined) {
       return false; // Skip generated index pages when includeGeneratedIndex is false
@@ -128,4 +138,39 @@ export function shouldProcessRoute(
   }
 
   return true;
+}
+
+/**
+ * Determines if a route should be processed based on plugin configuration
+ * This uses the union of generate and indexing configs to ensure we process
+ * everything that might be needed for either use case
+ * @internal
+ * @deprecated Use shouldIncludeRoute with specific filter config instead
+ */
+export function shouldProcessRoute(
+  route: PluginRouteConfig,
+  options: PluginOptions
+): boolean {
+  // For processing, we need to include routes that are in EITHER
+  // markdown OR llmsTxt
+  const markdown = options.markdown ?? {};
+  const llmsTxt = options.llmsTxt ?? {};
+
+  const unionConfig: IncludeFilterConfig = {
+    includeDocs:
+      (markdown.includeDocs ?? true) || (llmsTxt.includeDocs ?? true),
+    includeVersionedDocs:
+      (markdown.includeVersionedDocs ?? true) ||
+      (llmsTxt.includeVersionedDocs ?? false),
+    includeBlog:
+      (markdown.includeBlog ?? false) || (llmsTxt.includeBlog ?? false),
+    includePages:
+      (markdown.includePages ?? false) || (llmsTxt.includePages ?? false),
+    includeGeneratedIndex:
+      (markdown.includeGeneratedIndex ?? true) ||
+      (llmsTxt.includeGeneratedIndex ?? true),
+    excludeRoutes: [], // Exclusions handled separately
+  };
+
+  return shouldIncludeRoute(route, unionConfig);
 }

@@ -9,8 +9,6 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 
-import { generateSectionId } from '../utils';
-
 import type { Logger } from '../types';
 import type { AttachmentFile } from '../types/public';
 
@@ -41,7 +39,7 @@ export class AttachmentProcessor {
    * Process attachment files and copy them to the output directory
    */
   async processAttachments(
-    attachments: readonly AttachmentFile[],
+    attachments: readonly (AttachmentFile & { sectionId: string })[],
     siteDir: string,
     outDir: string
   ): Promise<ProcessedAttachment[]> {
@@ -56,6 +54,7 @@ export class AttachmentProcessor {
     await fs.ensureDir(attachmentsDir);
 
     const processed: ProcessedAttachment[] = [];
+    const usedFileNames = new Set<string>();
 
     for (const attachment of attachments) {
       try {
@@ -70,12 +69,38 @@ export class AttachmentProcessor {
         // Read file content as-is
         const content = await fs.readFile(sourcePath, 'utf-8');
 
-        // Generate output filename (always .md)
-        const baseName = path.basename(
-          attachment.source,
-          path.extname(attachment.source)
-        );
-        const outputFileName = `${baseName}.md`;
+        // Determine base filename
+        let baseName: string;
+        if (attachment.fileName) {
+          // Use custom fileName if provided
+          baseName = attachment.fileName;
+        } else {
+          // Extract from source path
+          baseName = path.basename(
+            attachment.source,
+            path.extname(attachment.source)
+          );
+        }
+
+        // Handle filename collisions by auto-numbering
+        let outputFileName = `${baseName}.md`;
+        let counter = 2;
+        while (usedFileNames.has(outputFileName)) {
+          outputFileName = `${baseName}-${counter}.md`;
+          counter += 1;
+        }
+
+        // Warn about auto-numbered files (collision detected)
+        if (counter > 2) {
+          this.logger.warn(
+            `Filename collision detected for "${baseName}.md". ` +
+              `Using "${outputFileName}" instead. ` +
+              `Consider setting a custom "fileName" for attachment: ${attachment.title}`
+          );
+        }
+
+        usedFileNames.add(outputFileName);
+
         const outputPath = path.join(attachmentsDir, outputFileName);
 
         // Write content to .md file (no processing, just raw content)
@@ -85,9 +110,8 @@ export class AttachmentProcessor {
           `Copied attachment ${attachment.source} to ${outputFileName}`
         );
 
-        // Use sectionId directly (auto-assign if not provided)
-        const sectionId =
-          attachment.sectionId || generateSectionId('attachments');
+        // Use sectionId from attachment (provided by collectAllAttachments)
+        const sectionId = attachment.sectionId;
 
         // Create metadata for llms.txt and llms-full.txt
         processed.push({

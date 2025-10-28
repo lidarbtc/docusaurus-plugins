@@ -12,7 +12,7 @@ import pMap from 'p-map';
 import { CacheManager } from '../cache/cache';
 import { validateCliContext } from '../cache/cache-strategy';
 import { hashFile } from '../cache/cache-validation';
-import { getEffectiveConfigForRoute, getGenerateConfig } from '../config';
+import { getEffectiveConfigForRoute, getMarkdownConfig } from '../config';
 import { ERROR_MESSAGES } from '../constants';
 import { getErrorMessage } from '../errors';
 import { analyzeProcessingContext } from './processing-context';
@@ -72,7 +72,7 @@ async function processSingleRoute(
 
     if (doc) {
       const hash = await hashFile(fullHtmlPath);
-      const generateConfig = getGenerateConfig(config);
+      const generateConfig = getMarkdownConfig(config);
 
       // Note: This is a temporary CacheManager just for the update method
       // We don't have siteConfig here, but it's not needed for
@@ -83,7 +83,7 @@ async function processSingleRoute(
         cachedRoute,
         doc,
         hash,
-        generateConfig.enableMarkdownFiles
+        generateConfig.enableFiles
       );
 
       logger.debug(`Processed route: ${route.path}`);
@@ -126,8 +126,16 @@ async function processRoutesStream(
     outDir,
     siteConfig
   );
+  // Check if existing cached routes have contentSelectors field
+  // If not, we need to regenerate them to include the new field
+  const needsRegeneration =
+    existingCachedRoutes &&
+    existingCachedRoutes.some((route) => !route.contentSelectors);
+
   const cachedRoutes =
-    existingCachedRoutes ?? cacheManager.createCachedRouteInfo(routes);
+    existingCachedRoutes && !needsRegeneration
+      ? existingCachedRoutes
+      : cacheManager.createCachedRouteInfo(routes);
   const directories = { docsDir, mdOutDir };
 
   // Create route lookup table for link resolution

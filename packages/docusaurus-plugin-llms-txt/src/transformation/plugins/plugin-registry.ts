@@ -87,7 +87,7 @@ export class PluginRegistry {
       const linkOptions: RehypeLinksOptions = {
         baseUrl: options.baseUrl ?? '',
         relativePaths: options.relativePaths !== false,
-        enableMarkdownFiles: options.enableMarkdownFiles !== false,
+        enableFiles: options.enableFiles !== false,
         excludeRoutes: options.excludeRoutes ?? [],
         fullConfig: options.fullConfig,
         routeLookup: options.routeLookup,

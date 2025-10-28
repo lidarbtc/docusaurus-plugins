@@ -43,10 +43,19 @@ export function stripBaseUrl(routePath: string, baseUrl: string): string {
   // This ensures proper leading/trailing slash handling
   const normalizedBase = normalizeUrl([baseUrl]);
 
-  // Remove trailing slash for comparison
-  const baseForComparison = normalizedBase.replace(/\/$/, '');
+  // Extract pathname from baseUrl if it's a full URL
+  let basePathname = normalizedBase;
+  try {
+    const url = new URL(normalizedBase);
+    basePathname = url.pathname;
+  } catch {
+    // Not a full URL, use as-is
+  }
 
-  // If route starts with baseUrl, remove it
+  // Remove trailing slash for comparison
+  const baseForComparison = basePathname.replace(/\/$/, '');
+
+  // If route starts with baseUrl pathname, remove it
   if (routePath.startsWith(baseForComparison)) {
     const stripped = routePath.slice(baseForComparison.length);
     // Ensure the result starts with / or is empty for root
@@ -71,33 +80,60 @@ export function stripBaseUrl(routePath: string, baseUrl: string): string {
 export function formatUrl(
   routePath: string,
   options: {
-    enableMarkdownFiles?: boolean;
+    enableFiles?: boolean;
     relativePaths?: boolean;
     markdownFile?: string;
   },
   baseUrl = ''
 ): string {
-  const {
-    enableMarkdownFiles = true,
-    relativePaths = true,
-    markdownFile,
-  } = options;
+  const { enableFiles = true, relativePaths = true, markdownFile } = options;
 
   // Ensure route path starts with /
   let targetPath = ensureLeadingSlash(routePath);
 
   // Use markdown file path if available and enabled
-  if (enableMarkdownFiles && markdownFile) {
+  if (enableFiles && markdownFile) {
     // Ensure markdown file path starts with / for consistency
     targetPath = ensureLeadingSlash(markdownFile);
-  } else if (enableMarkdownFiles) {
+  } else if (enableFiles) {
+    // Remove trailing slash before adding .md extension to prevent /.md
+    const pathForExtension =
+      targetPath.endsWith('/') && targetPath !== '/'
+        ? targetPath.slice(0, -1)
+        : targetPath;
     // Add .md extension to route path
-    targetPath = targetPath === '/' ? INDEX_MD : `${targetPath}.md`;
+    targetPath = pathForExtension === '/' ? INDEX_MD : `${pathForExtension}.md`;
   }
 
   // Handle absolute vs relative paths
   if (relativePaths === false && baseUrl) {
-    return normalizeUrl([baseUrl, targetPath]);
+    // Strip baseUrl if it's already in the path to prevent duplication
+    const pathWithoutBase = stripBaseUrl(targetPath, baseUrl);
+    return normalizeUrl([baseUrl, pathWithoutBase]);
+  }
+
+  // For relative paths with baseUrl, ensure baseUrl path is included
+  if (relativePaths === true && baseUrl) {
+    // Extract pathname from baseUrl if it's a full URL
+    let basePathname = baseUrl;
+    try {
+      const url = new URL(baseUrl);
+      basePathname = url.pathname;
+    } catch {
+      // Not a full URL, use as-is
+    }
+
+    // Normalize baseUrl pathname
+    basePathname = normalizeUrl([basePathname]);
+    const baseForComparison = basePathname.replace(/\/$/, '');
+
+    // If targetPath doesn't start with baseUrl pathname, prepend it
+    if (
+      baseForComparison !== '/' &&
+      !targetPath.startsWith(baseForComparison)
+    ) {
+      return normalizeUrl([basePathname, targetPath]);
+    }
   }
 
   // For relative paths, ensure we preserve the leading slash

@@ -18,7 +18,7 @@ export interface SiteConfig {
 /**
  * Normalize pathname by removing trailing slash (except root)
  */
-export function normalizePathname(pathname: string): string {
+function normalizePathname(pathname: string): string {
   // Handle root path
   if (pathname === '' || pathname === '/') {
     return '/index';
@@ -42,27 +42,54 @@ export function constructMarkdownUrl(pathname: string): string {
 }
 
 /**
+ * Construct relative HTML URL for fetching (fallback when markdown unavailable)
+ * Handles trailingSlash configuration and index.html cases
+ * Examples:
+ *   "/api/intro" with trailingSlash=true → "/api/intro/index.html"
+ *   "/api/intro" with trailingSlash=false → "/api/intro.html"
+ */
+export function constructHtmlUrl(
+  pathname: string,
+  trailingSlash?: boolean
+): string {
+  const normalized = normalizePathname(pathname);
+
+  // Handle root path
+  if (normalized === '/index') {
+    return '/index.html';
+  }
+
+  // Handle based on trailingSlash configuration
+  if (trailingSlash === false) {
+    return `${normalized}.html`;
+  }
+
+  // Default behavior (trailingSlash: true or undefined)
+  return `${normalized}/index.html`;
+}
+
+/**
  * Construct full absolute URL for AI prompts
- * Example: "/api/intro" → "https://site.com/baseUrl/api/intro.md"
+ * Note: pathname should already include baseUrl
+ *       (use useBaseUrl hook in React components)
+ * Examples:
+ *   With markdown: "/baseUrl/api/intro" →
+ *     "https://site.com/baseUrl/api/intro.md"
+ *   Without markdown: "/baseUrl/api/intro" →
+ *     "https://site.com/baseUrl/api/intro"
  */
 export function constructFullUrl(
   pathname: string,
-  siteConfig: SiteConfig
+  siteConfig: SiteConfig,
+  hasMarkdown = true
 ): string {
-  const markdownPath = constructMarkdownUrl(pathname);
+  // If markdown is available, use .md extension, otherwise use the regular path
+  const contentPath = hasMarkdown ? constructMarkdownUrl(pathname) : pathname;
 
-  // Remove leading slash from markdownPath for joining
-  const pathWithoutSlash = markdownPath.startsWith('/')
-    ? markdownPath.slice(1)
-    : markdownPath;
-
-  // Build full URL: siteUrl + baseUrl + markdownPath
+  // Build full URL: siteUrl + contentPath (pathname already includes baseUrl)
   const siteUrl = siteConfig.url.endsWith('/')
     ? siteConfig.url.slice(0, -1)
     : siteConfig.url;
-  const baseUrl = siteConfig.baseUrl.startsWith('/')
-    ? siteConfig.baseUrl
-    : `/${siteConfig.baseUrl}`;
 
-  return `${siteUrl}${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}${pathWithoutSlash}`;
+  return `${siteUrl}${contentPath}`;
 }

@@ -11,15 +11,14 @@
 
 export type {
   PluginOptions,
-  GenerateOptions,
-  IncludeOptions,
-  StructureOptions,
-  ProcessingOptions,
+  MarkdownOptions,
+  LlmsTxtOptions,
   UiOptions,
   RouteRule,
   SectionRoute,
   OptionalLink,
   SectionDefinition,
+  AttachmentFile,
   Logger,
   PluginError,
   PluginConfigError,

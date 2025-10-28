@@ -1,6 +1,6 @@
 {
   "name": "website",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.1",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
@@ -17,11 +17,15 @@
     "llms-txt-clean": "docusaurus llms-txt-clean"
   },
   "dependencies": {
-    "@docusaurus/core": "3.8.1",
-    "@docusaurus/preset-classic": "3.8.1",
+    "@docusaurus/core": "^3.9.1",
+    "@docusaurus/faster": "^3.9.1",
+    "@docusaurus/module-type-aliases": "^3.9.1",
+    "@docusaurus/preset-classic": "^3.9.1",
+    "@docusaurus/tsconfig": "^3.9.1",
+    "@docusaurus/types": "^3.9.1",
     "@mdx-js/react": "^3.0.0",
-    "@signalwire/docusaurus-plugin-llms-txt": "2.0.0-alpha.0",
-    "@signalwire/docusaurus-theme-llms-txt": "1.0.0-alpha.0",
+    "@signalwire/docusaurus-plugin-llms-txt": "2.0.0-alpha.6",
+    "@signalwire/docusaurus-theme-llms-txt": "1.0.0-alpha.8",
     "clsx": "^2.0.0",
     "docusaurus-plugin-sass": "^0.2.6",
     "prism-react-renderer": "^2.3.0",

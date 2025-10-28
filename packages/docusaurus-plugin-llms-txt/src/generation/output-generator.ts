@@ -7,18 +7,27 @@
 
 import path from 'path';
 
-import { getGenerateConfig } from '../config';
+import { getLlmsTxtIncludeConfig, getLlmsTxtConfig } from '../config';
 import {
-  LLMS_TXT_FILENAME,
+  CONTENT_TYPES,
   LLMS_FULL_TXT_FILENAME,
+  LLMS_TXT_FILENAME,
   PROCESSING_MESSAGES,
 } from '../constants';
 import { buildLlmsFullTxtContent } from './full-index-builder';
 import { buildLlmsTxtContent, buildUnifiedDocumentTree } from './index-builder';
 import { saveMarkdownFile } from './markdown-writer';
+import { createExclusionMatcher } from '../discovery/exclusion-matcher';
 
 import type { ProcessedAttachment } from '../processing/attachment-processor';
-import type { DocInfo, PluginOptions, Logger, DirectoryConfig } from '../types';
+import type {
+  CachedRouteInfo,
+  CacheSchema,
+  DirectoryConfig,
+  DocInfo,
+  Logger,
+  PluginOptions,
+} from '../types';
 
 /**
  * Output generation result
@@ -30,6 +39,90 @@ export interface OutputResult {
 }
 
 /**
+ * Filter docs based on indexing configuration
+ * This determines what appears in the main llms.txt file
+ * @internal
+ */
+function filterDocsForIndexing(
+  docs: DocInfo[],
+  config: PluginOptions,
+  cache: CacheSchema,
+  logger: Logger
+): DocInfo[] {
+  const indexingConfig = getLlmsTxtIncludeConfig(config);
+  const isExcluded = createExclusionMatcher(indexingConfig.excludeRoutes);
+
+  // Build lookup from cache
+  const routeLookup = new Map<string, CachedRouteInfo>();
+  for (const route of cache.routes) {
+    routeLookup.set(route.path, route);
+  }
+
+  const filtered = docs.filter((doc) => {
+    // Check exclusion patterns
+    if (isExcluded(doc.routePath)) {
+      logger.debug(`Excluding from llms.txt (pattern): ${doc.routePath}`);
+      return false;
+    }
+
+    // Get cached route info for metadata
+    const cachedRoute = routeLookup.get(doc.routePath);
+    if (!cachedRoute) {
+      // If no cached route info, include by default (shouldn't happen)
+      return true;
+    }
+
+    // Check content type
+    switch (cachedRoute.contentType) {
+      case CONTENT_TYPES.BLOG:
+        if (!indexingConfig.includeBlog) {
+          logger.debug(`Excluding from llms.txt (blog): ${doc.routePath}`);
+          return false;
+        }
+        break;
+      case CONTENT_TYPES.PAGES:
+        if (!indexingConfig.includePages) {
+          logger.debug(`Excluding from llms.txt (pages): ${doc.routePath}`);
+          return false;
+        }
+        break;
+      case CONTENT_TYPES.DOCS:
+      case CONTENT_TYPES.UNKNOWN:
+      default:
+        if (!indexingConfig.includeDocs) {
+          logger.debug(`Excluding from llms.txt (docs): ${doc.routePath}`);
+          return false;
+        }
+        break;
+    }
+
+    // Check versioned docs
+    if (cachedRoute.isVersioned && !indexingConfig.includeVersionedDocs) {
+      logger.debug(`Excluding from llms.txt (versioned): ${doc.routePath}`);
+      return false;
+    }
+
+    // Check generated index
+    if (cachedRoute.isGeneratedIndex && !indexingConfig.includeGeneratedIndex) {
+      logger.debug(
+        `Excluding from llms.txt (generated index): ${doc.routePath}`
+      );
+      return false;
+    }
+
+    return true;
+  });
+
+  if (filtered.length < docs.length) {
+    logger.info(
+      `Filtered for llms.txt: ${filtered.length}/${docs.length} docs included`
+    );
+  }
+
+  return filtered;
+}
+
+/**
  * Generate and save output files
  */
 export async function generateOutputFiles(
@@ -38,7 +131,8 @@ export async function generateOutputFiles(
   siteConfig: { title?: string; url: string; baseUrl: string },
   directories: DirectoryConfig,
   logger: Logger,
-  attachments?: readonly ProcessedAttachment[]
+  attachments?: readonly ProcessedAttachment[],
+  cache?: CacheSchema
 ): Promise<OutputResult> {
   if (docs.length === 0) {
     logger.info(PROCESSING_MESSAGES.NO_DOCUMENTS);
@@ -48,12 +142,18 @@ export async function generateOutputFiles(
     };
   }
 
-  // Build the unified tree first (used by llms.txt)
-  buildUnifiedDocumentTree(docs, config, attachments);
+  // Filter docs for indexing (llms.txt) if cache is available
+  const docsForIndexing =
+    cache && cache.routes.length > 0
+      ? filterDocsForIndexing(docs, config, cache, logger)
+      : docs;
 
-  // Build llms.txt content using the tree
+  // Build the unified tree first (used by llms.txt) with filtered docs
+  buildUnifiedDocumentTree(docsForIndexing, config, attachments);
+
+  // Build llms.txt content using the tree with filtered docs
   const llmsTxtContent = buildLlmsTxtContent(
-    docs,
+    docsForIndexing,
     config,
     siteConfig,
     attachments
@@ -68,17 +168,17 @@ export async function generateOutputFiles(
   await saveMarkdownFile(llmsTxtPath, llmsTxtContent);
 
   logger.debug(`Successfully saved llms.txt`);
-  const totalItems = docs.length + (attachments?.length ?? 0);
+  const totalItems = docsForIndexing.length + (attachments?.length ?? 0);
   logger.info(
-    `Generated llms.txt with ${docs.length} documents${attachments?.length ? ` and ${attachments.length} attachments` : ''}`
+    `Generated llms.txt with ${docsForIndexing.length} documents${attachments?.length ? ` and ${attachments.length} attachments` : ''}`
   );
 
   let llmsFullTxtPath: string | undefined;
   let totalContentLength = llmsTxtContent.length;
 
   // Generate llms-full.txt if enabled
-  const generateConfig = getGenerateConfig(config);
-  if (generateConfig.enableLlmsFullTxt) {
+  const llmsTxtConfig = getLlmsTxtConfig(config);
+  if (llmsTxtConfig.enableLlmsFullTxt) {
     const llmsFullTxtContent = await buildLlmsFullTxtContent(
       docs,
       config,

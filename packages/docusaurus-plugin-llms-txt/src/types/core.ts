@@ -31,6 +31,7 @@ export interface CachedRouteInfo {
   readonly contentType: ContentType;
   readonly isVersioned?: boolean; // true for non-latest versions (isLast=false), false for latest (isLast=true)
   readonly isGeneratedIndex?: boolean;
+  readonly contentSelectors: readonly string[]; // Content selectors for HTML extraction (always present)
 }
 
 /**
@@ -79,6 +80,7 @@ export interface TreeNode {
   readonly subCategories: readonly TreeNode[];
   readonly title?: string;
   readonly description?: string;
+  readonly position?: number;
   readonly indexDoc?: DocInfo;
 }
 
@@ -133,7 +135,7 @@ export interface ProcessingResult {
 export interface RehypeLinksOptions {
   readonly baseUrl?: string;
   readonly relativePaths?: boolean;
-  readonly enableMarkdownFiles?: boolean;
+  readonly enableFiles?: boolean;
   readonly excludeRoutes?: readonly string[];
   readonly fullConfig?: PluginOptions;
   readonly routeLookup?: Map<string, CachedRouteInfo>;
@@ -146,7 +148,7 @@ export interface MarkdownConversionOptions {
   readonly contentSelectors?: readonly string[];
   readonly relativePaths?: boolean;
   readonly baseUrl?: string;
-  readonly enableMarkdownFiles?: boolean;
+  readonly enableFiles?: boolean;
   readonly excludeRoutes?: readonly string[];
   readonly fullConfig?: PluginOptions;
   readonly rehypeProcessTables?: boolean;

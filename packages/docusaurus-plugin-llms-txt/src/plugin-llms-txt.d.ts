@@ -25,10 +25,20 @@ declare module '@theme/CopyPageContent' {
   import type { ReactNode } from 'react';
 
   export interface Props {
-    readonly className?: string;
+    readonly isMobile?: boolean;
   }
 
   export default function CopyPageContent(props: Props): ReactNode;
+}
+
+// DocBreadcrumbs - wrapper that adds CopyPageContent button next to breadcrumbs
+// This is a wrapped component that extends the default Docusaurus breadcrumbs
+declare module '@theme/DocBreadcrumbs' {
+  import type { ReactNode } from 'react';
+
+  export type Props = Record<string, never>;
+
+  export default function DocBreadcrumbs(props: Props): ReactNode;
 }
 
 // CopyButton subcomponent
@@ -54,6 +64,8 @@ declare module '@theme/CopyPageContent/DropdownMenu' {
     readonly isOpen: boolean;
     readonly finalConfig: any;
     readonly onAction: (action: string) => void;
+    readonly isMobile?: boolean;
+    readonly hasMarkdown?: boolean;
   }
 
   export default function DropdownMenu(props: Props): ReactNode;
@@ -76,6 +88,8 @@ declare module '@theme/CopyPageContent/DropdownMenu/MenuItem' {
 declare module '@theme/CopyPageContent/Icons' {
   export { default as ChevronIcon } from '@theme/CopyPageContent/Icons/ChevronIcon';
   export { default as MarkdownIcon } from '@theme/CopyPageContent/Icons/MarkdownIcon';
+  export { default as HtmlIcon } from '@theme/CopyPageContent/Icons/HtmlIcon';
+  export { default as CopyIcon } from '@theme/CopyPageContent/Icons/CopyIcon';
   export { default as ChatGPTIcon } from '@theme/CopyPageContent/Icons/ChatGPTIcon';
   export { default as ClaudeIcon } from '@theme/CopyPageContent/Icons/ClaudeIcon';
 }
@@ -93,6 +107,16 @@ declare module '@theme/CopyPageContent/Icons/MarkdownIcon' {
   export default function MarkdownIcon(): ReactNode;
 }
 
+declare module '@theme/CopyPageContent/Icons/HtmlIcon' {
+  import type { ReactNode } from 'react';
+  export default function HtmlIcon(): ReactNode;
+}
+
+declare module '@theme/CopyPageContent/Icons/CopyIcon' {
+  import type { ReactNode } from 'react';
+  export default function CopyIcon(): ReactNode;
+}
+
 declare module '@theme/CopyPageContent/Icons/ChatGPTIcon' {
   import type { ReactNode } from 'react';
   export default function ChatGPTIcon(): ReactNode;
@@ -101,15 +125,4 @@ declare module '@theme/CopyPageContent/Icons/ChatGPTIcon' {
 declare module '@theme/CopyPageContent/Icons/ClaudeIcon' {
   import type { ReactNode } from 'react';
   export default function ClaudeIcon(): ReactNode;
-}
-
-// DocItem Content component (existing)
-declare module '@theme/DocItem/Content' {
-  import type { ReactNode } from 'react';
-  import type { WrapperProps } from '@docusaurus/types';
-  import type ContentType from '@theme-init/DocItem/Content';
-
-  export type Props = WrapperProps<typeof ContentType>;
-
-  export default function DocItemContent(props: Props): ReactNode;
 }

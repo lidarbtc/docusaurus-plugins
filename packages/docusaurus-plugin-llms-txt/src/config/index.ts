@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { VALIDATION_MESSAGES } from '../constants';
+import { DEFAULT_EXCLUDE_ROUTES, VALIDATION_MESSAGES } from '../constants';
 import { createConfigError } from '../errors';
 import { pluginOptionsSchema } from '../types';
 import { ensureLeadingSlash } from '../utils';
@@ -15,10 +15,8 @@ import { validateSections } from './section-validator';
 import type {
   PluginOptions,
   EffectiveConfig,
-  GenerateOptions,
-  IncludeOptions,
-  StructureOptions,
-  ProcessingOptions,
+  MarkdownOptions,
+  LlmsTxtOptions,
   UiOptions,
 } from '../types';
 
@@ -39,12 +37,14 @@ export function getConfig(options: Partial<PluginOptions>): PluginOptions {
 
     const validated = validationResult.value;
 
-    // Validate section configuration using new structure
-    if (validated.structure?.sections) {
+    // Validate section configuration (now in llmsTxt config)
+    if (validated.llmsTxt?.sections) {
+      // Note: validateSections will collect attachments from both
+      // global llmsTxt.attachments and section-specific attachments
       validateSections(
-        validated.structure.sections,
-        validated.processing?.routeRules,
-        validated.processing?.attachments
+        validated.llmsTxt.sections,
+        validated.markdown?.routeRules,
+        validated.llmsTxt?.attachments
       );
     }
 
@@ -67,74 +67,122 @@ export function getConfig(options: Partial<PluginOptions>): PluginOptions {
 export { validateUserInputs } from './security-validator';
 
 /**
- * Get output generation configuration with defaults applied
+ * Get markdown generation configuration with defaults applied
  * @internal
  */
-export function getGenerateConfig(
+export function getMarkdownConfig(
   config: PluginOptions
-): Required<GenerateOptions> {
-  const generate = config.generate ?? {};
+): Required<MarkdownOptions> {
+  const markdown = config.markdown ?? {};
   return {
-    enableMarkdownFiles: generate.enableMarkdownFiles ?? true,
-    enableLlmsFullTxt: generate.enableLlmsFullTxt ?? false,
-    relativePaths: generate.relativePaths ?? true,
+    enableFiles: markdown.enableFiles ?? true,
+    relativePaths: markdown.relativePaths ?? true,
+    includeDocs: markdown.includeDocs ?? true,
+    includeVersionedDocs: markdown.includeVersionedDocs ?? true,
+    includeBlog: markdown.includeBlog ?? false,
+    includePages: markdown.includePages ?? false,
+    includeGeneratedIndex: markdown.includeGeneratedIndex ?? true,
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(markdown.excludeRoutes ?? []),
+    ],
+    // Content extraction and processing
+    contentSelectors: markdown.contentSelectors ?? [],
+    routeRules: markdown.routeRules ?? [],
+    // Markdown processing options
+    remarkStringify: markdown.remarkStringify ?? {},
+    remarkGfm: markdown.remarkGfm ?? true,
+    rehypeProcessTables: markdown.rehypeProcessTables ?? true,
+    // Unified plugin system
+    beforeDefaultRehypePlugins: markdown.beforeDefaultRehypePlugins ?? [],
+    rehypePlugins: markdown.rehypePlugins ?? [],
+    beforeDefaultRemarkPlugins: markdown.beforeDefaultRemarkPlugins ?? [],
+    remarkPlugins: markdown.remarkPlugins ?? [],
   };
 }
 
 /**
- * Get content inclusion configuration with defaults applied
+ * Get filtering config for markdown generation
  * @internal
  */
-export function getIncludeConfig(
-  config: PluginOptions
-): Required<IncludeOptions> {
-  const include = config.include ?? {};
+export function getMarkdownIncludeConfig(config: PluginOptions): {
+  includeDocs: boolean;
+  includeVersionedDocs: boolean;
+  includeBlog: boolean;
+  includePages: boolean;
+  includeGeneratedIndex: boolean;
+  excludeRoutes: readonly string[];
+} {
+  const markdown = config.markdown ?? {};
   return {
-    includeBlog: include.includeBlog ?? false,
-    includePages: include.includePages ?? false,
-    includeDocs: include.includeDocs ?? true,
-    includeVersionedDocs: include.includeVersionedDocs ?? true,
-    includeGeneratedIndex: include.includeGeneratedIndex ?? true,
-    excludeRoutes: include.excludeRoutes ?? [],
+    includeDocs: markdown.includeDocs ?? true,
+    includeVersionedDocs: markdown.includeVersionedDocs ?? true,
+    includeBlog: markdown.includeBlog ?? false,
+    includePages: markdown.includePages ?? false,
+    includeGeneratedIndex: markdown.includeGeneratedIndex ?? true,
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(markdown.excludeRoutes ?? []),
+    ],
   };
 }
 
 /**
- * Get content structure configuration with defaults applied
+ * Get llms.txt configuration with defaults applied
  * @internal
  */
-export function getStructureConfig(
+export function getLlmsTxtConfig(
   config: PluginOptions
-): Required<StructureOptions> {
-  const structure = config.structure ?? {};
+): Omit<Required<LlmsTxtOptions>, 'autoSectionPosition'> &
+  Pick<LlmsTxtOptions, 'autoSectionPosition'> {
+  const llmsTxt = config.llmsTxt ?? {};
   return {
-    sections: structure.sections ?? [],
-    siteTitle: structure.siteTitle ?? '',
-    siteDescription: structure.siteDescription ?? '',
-    enableDescriptions: structure.enableDescriptions ?? true,
-    optionalLinks: structure.optionalLinks ?? [],
+    enableLlmsFullTxt: llmsTxt.enableLlmsFullTxt ?? false,
+    includeDocs: llmsTxt.includeDocs ?? true,
+    includeVersionedDocs: llmsTxt.includeVersionedDocs ?? false,
+    includeBlog: llmsTxt.includeBlog ?? false,
+    includePages: llmsTxt.includePages ?? false,
+    includeGeneratedIndex: llmsTxt.includeGeneratedIndex ?? true,
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(llmsTxt.excludeRoutes ?? []),
+    ],
+    // Structure and organization
+    sections: llmsTxt.sections ?? [],
+    siteTitle: llmsTxt.siteTitle ?? '',
+    siteDescription: llmsTxt.siteDescription ?? '',
+    enableDescriptions: llmsTxt.enableDescriptions ?? true,
+    autoSectionDepth: llmsTxt.autoSectionDepth ?? 1,
+    autoSectionPosition: llmsTxt.autoSectionPosition,
+    optionalLinks: llmsTxt.optionalLinks ?? [],
+    // Attachments
+    attachments: llmsTxt.attachments ?? [],
   };
 }
 
 /**
- * Get content processing configuration with defaults applied
+ * Get filtering config for llms.txt indexing
  * @internal
  */
-export function getProcessingConfig(
-  config: PluginOptions
-): Required<ProcessingOptions> {
-  const processing = config.processing ?? {};
+export function getLlmsTxtIncludeConfig(config: PluginOptions): {
+  includeDocs: boolean;
+  includeVersionedDocs: boolean;
+  includeBlog: boolean;
+  includePages: boolean;
+  includeGeneratedIndex: boolean;
+  excludeRoutes: readonly string[];
+} {
+  const llmsTxt = config.llmsTxt ?? {};
   return {
-    contentSelectors: processing.contentSelectors ?? [],
-    routeRules: processing.routeRules ?? [],
-    attachments: processing.attachments ?? [],
-    remarkStringify: processing.remarkStringify ?? {},
-    remarkGfm: processing.remarkGfm ?? true,
-    rehypeProcessTables: processing.rehypeProcessTables ?? true,
-    beforeDefaultRehypePlugins: processing.beforeDefaultRehypePlugins ?? [],
-    rehypePlugins: processing.rehypePlugins ?? [],
-    beforeDefaultRemarkPlugins: processing.beforeDefaultRemarkPlugins ?? [],
-    remarkPlugins: processing.remarkPlugins ?? [],
+    includeDocs: llmsTxt.includeDocs ?? true,
+    includeVersionedDocs: llmsTxt.includeVersionedDocs ?? false,
+    includeBlog: llmsTxt.includeBlog ?? false,
+    includePages: llmsTxt.includePages ?? false,
+    includeGeneratedIndex: llmsTxt.includeGeneratedIndex ?? true,
+    excludeRoutes: [
+      ...DEFAULT_EXCLUDE_ROUTES,
+      ...(llmsTxt.excludeRoutes ?? []),
+    ],
   };
 }
 
@@ -147,6 +195,61 @@ export function getUiConfig(config: PluginOptions): Required<UiOptions> {
   return {
     copyPageContent: ui.copyPageContent ?? false,
   };
+}
+
+/**
+ * Collect all attachments from config (global + section-specific) with
+ * their sectionIds
+ * @internal
+ */
+export function collectAllAttachments(
+  config: PluginOptions
+): Array<import('../types').AttachmentFile & { sectionId: string }> {
+  const llmsTxt = config.llmsTxt ?? {};
+  const attachmentsWithSections: Array<
+    import('../types').AttachmentFile & { sectionId: string }
+  > = [];
+
+  // Helper to recursively collect from sections
+  function collectFromSections(
+    sections: readonly import('../types').SectionDefinition[] | undefined
+  ): void {
+    if (!sections) {
+      return;
+    }
+
+    for (const section of sections) {
+      // Add section-specific attachments
+      if (section.attachments) {
+        for (const attachment of section.attachments) {
+          attachmentsWithSections.push({
+            ...attachment,
+            sectionId: section.id,
+          });
+        }
+      }
+
+      // Recursively collect from subsections
+      if (section.subsections) {
+        collectFromSections(section.subsections);
+      }
+    }
+  }
+
+  // Collect from all sections (including subsections)
+  collectFromSections(llmsTxt.sections);
+
+  // Add global attachments (they get their own auto-generated section)
+  if (llmsTxt.attachments) {
+    for (const attachment of llmsTxt.attachments) {
+      attachmentsWithSections.push({
+        ...attachment,
+        sectionId: 'attachments', // Auto-generated section ID for global attachments
+      });
+    }
+  }
+
+  return attachmentsWithSections;
 }
 
 /**

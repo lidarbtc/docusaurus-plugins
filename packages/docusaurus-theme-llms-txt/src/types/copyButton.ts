@@ -18,10 +18,22 @@
 export interface CopyPageContentOptions {
   /** Custom button label (default: 'Copy Page') */
   readonly buttonLabel?: string;
-  /** Available copy and share actions */
+  /** Control where the copy button is displayed */
+  readonly display?: {
+    /** Show on docs pages (default: true) */
+    readonly docs?: boolean;
+    /** Exclude specific routes by path pattern */
+    readonly excludeRoutes?: readonly string[];
+  };
+  /** Strategy for what content to copy (default: 'prefer-markdown') */
+  readonly contentStrategy?: 'prefer-markdown' | 'html-only';
+  /** Available actions in the dropdown menu */
   readonly actions?: {
-    /** Enable markdown copy option (default: true) */
-    readonly markdown?: boolean;
+    /**
+     * Enable view markdown option (default: true) - only shows when
+     * markdown is available
+     */
+    readonly viewMarkdown?: boolean;
     /** AI integration options */
     readonly ai?: {
       /** ChatGPT integration - true enables with default prompt */

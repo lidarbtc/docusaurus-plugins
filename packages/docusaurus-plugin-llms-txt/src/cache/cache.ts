@@ -11,6 +11,8 @@ import packageJson from '../../package.json';
 import { CACHE_FILENAME } from '../constants';
 import { CacheIO } from './cache-io';
 import { isCachedRouteValid, calcConfigHash } from './cache-validation';
+import { getMarkdownConfig } from '../config';
+import { getEffectiveConfigForRoute } from '../config/route-rules';
 import { classifyRoute } from '../discovery/content-classifier';
 import { routePathToHtmlPath } from '../discovery/route-filter';
 import { PathManager, htmlPathToMdPath } from '../filesystem/paths';
@@ -31,6 +33,7 @@ export class CacheManager {
   private pathManager: PathManager;
   private cacheIO: CacheIO;
   private siteConfig?: { baseUrl: string; trailingSlash?: boolean };
+  private config: PluginOptions;
 
   constructor(
     siteDir: string,
@@ -42,6 +45,7 @@ export class CacheManager {
   ) {
     this.pathManager = new PathManager(siteDir, config, outDir);
     this.siteConfig = siteConfig;
+    this.config = config;
     const cacheDir = path.join(generatedFilesDir, 'docusaurus-plugin-llms-txt');
     const cachePath = path.join(cacheDir, CACHE_FILENAME);
     this.cacheIO = new CacheIO(cachePath, logger);
@@ -121,10 +125,24 @@ export class CacheManager {
         isGeneratedIndex,
       };
 
+      // Resolve content selectors for this route
+      const effectiveConfig = getEffectiveConfigForRoute(
+        route.path,
+        this.config
+      );
+
+      // Get content selectors from effective config (route-specific or
+      // base config). If effectiveConfig has explicit contentSelectors,
+      // use them. Otherwise, use markdown config contentSelectors.
+      const markdownConfig = getMarkdownConfig(this.config);
+      const contentSelectors =
+        effectiveConfig.contentSelectors ?? markdownConfig.contentSelectors;
+
       return {
         ...baseInfo,
         ...pluginInfo,
         ...metadata,
+        contentSelectors,
       } satisfies CachedRouteInfo;
     });
 
@@ -136,7 +154,7 @@ export class CacheManager {
     cachedRoute: CachedRouteInfo,
     doc: DocInfo,
     hash: string,
-    enableMarkdownFiles: boolean
+    enableFiles: boolean
   ): CachedRouteInfo {
     const baseUpdate = {
       ...cachedRoute,
@@ -145,9 +163,9 @@ export class CacheManager {
       description: doc.description,
     };
 
-    if (enableMarkdownFiles && doc.markdownFile) {
+    if (enableFiles && doc.markdownFile) {
       return { ...baseUpdate, markdownFile: doc.markdownFile };
-    } else if (enableMarkdownFiles && cachedRoute.htmlPath) {
+    } else if (enableFiles && cachedRoute.htmlPath) {
       const mdPath = htmlPathToMdPath(
         cachedRoute.htmlPath,
         this.pathManager.directories.mdOutDir

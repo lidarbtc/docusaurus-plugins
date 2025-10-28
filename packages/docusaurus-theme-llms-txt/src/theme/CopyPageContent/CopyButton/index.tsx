@@ -24,13 +24,15 @@ interface CopyButtonProps {
   onDropdownToggle: () => void;
 }
 
-export default function CopyButton({
+function CopyButton({
   copyStatus,
   finalConfig,
   isOpen,
   onMainAction,
   onDropdownToggle,
 }: CopyButtonProps): React.JSX.Element {
+  const ariaLabel = copyStatus === 'success' ? 'Copied' : 'Copy page';
+
   return (
     <div
       className={clsx(
@@ -42,9 +44,7 @@ export default function CopyButton({
         type='button'
         className={styles.mainButton}
         onClick={onMainAction}
-        aria-label={
-          copyStatus === 'success' ? 'Copied!' : 'Copy page as Markdown'
-        }
+        aria-label={ariaLabel}
       >
         {copyStatus === 'success' ? (
           <MdCheck className={styles.icon} />
@@ -52,7 +52,7 @@ export default function CopyButton({
           <MdFileCopy className={styles.icon} />
         )}
         <span>
-          {copyStatus === 'success' ? 'Copied!' : finalConfig.buttonLabel}
+          {copyStatus === 'success' ? 'Copied' : finalConfig.buttonLabel}
         </span>
       </button>
       <button
@@ -68,3 +68,5 @@ export default function CopyButton({
     </div>
   );
 }
+
+export default CopyButton;

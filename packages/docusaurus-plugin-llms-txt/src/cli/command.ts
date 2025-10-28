@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import { CacheManager } from '../cache/cache';
-import { getConfig, getProcessingConfig, getGenerateConfig } from '../config';
+import { getConfig, getMarkdownConfig } from '../config';
 import {
   LLMS_TXT_FILENAME,
   LLMS_FULL_TXT_FILENAME,
@@ -35,8 +35,7 @@ async function runCliConversion(
   context: LoadContext
 ): Promise<void> {
   const config = getConfig(options);
-  const processingConfig = getProcessingConfig(config);
-  const generateConfig = getGenerateConfig(config);
+  const markdownConfig = getMarkdownConfig(config);
   const log = createPluginLogger(config);
 
   try {
@@ -51,8 +50,8 @@ async function runCliConversion(
         siteConfig: context.siteConfig,
         outDir: context.outDir,
         logger: log,
-        contentSelectors: processingConfig.contentSelectors,
-        relativePaths: generateConfig.relativePaths,
+        contentSelectors: markdownConfig.contentSelectors,
+        relativePaths: markdownConfig.relativePaths,
       }
     );
 

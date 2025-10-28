@@ -13,6 +13,7 @@ import Translate from '@docusaurus/Translate';
 import MenuItem from '@theme/CopyPageContent/DropdownMenu/MenuItem';
 import ChatGPTIcon from '@theme/CopyPageContent/Icons/ChatGPTIcon';
 import ClaudeIcon from '@theme/CopyPageContent/Icons/ClaudeIcon';
+import HtmlIcon from '@theme/CopyPageContent/Icons/HtmlIcon';
 import MarkdownIcon from '@theme/CopyPageContent/Icons/MarkdownIcon';
 
 import type { ResolvedCopyPageContentOptions } from '../../../hooks';
@@ -23,27 +24,61 @@ interface DropdownMenuProps {
   isOpen: boolean;
   finalConfig: ResolvedCopyPageContentOptions;
   onAction: (action: string) => void;
+  isMobile?: boolean;
+  hasMarkdown?: boolean;
 }
 
 export default function DropdownMenu({
   isOpen,
   finalConfig,
   onAction,
+  isMobile = false,
+  hasMarkdown = true,
 }: DropdownMenuProps): React.JSX.Element {
+  // Determine what content will actually be copied based on contentStrategy
+  const willCopyMarkdown =
+    finalConfig.contentStrategy === 'prefer-markdown' && hasMarkdown;
+
   // Memoize action handlers to prevent unnecessary re-renders of MenuItem
   const handleCopyRaw = useCallback(() => onAction('copyRaw'), [onAction]);
+  const handleViewMarkdown = useCallback(
+    () => onAction('viewMarkdown'),
+    [onAction]
+  );
   const handleChatGPT = useCallback(() => onAction('openChatGPT'), [onAction]);
   const handleClaude = useCallback(() => onAction('openClaude'), [onAction]);
 
   return (
-    <div className={clsx(styles.dropdown, isOpen && styles.dropdownVisible)}>
-      {finalConfig.markdown && (
+    <div
+      className={clsx(
+        styles.dropdown,
+        isOpen && styles.dropdownVisible,
+        isMobile && styles.dropdownMobile
+      )}
+    >
+      <MenuItem
+        icon={willCopyMarkdown ? <MarkdownIcon /> : <HtmlIcon />}
+        description={
+          willCopyMarkdown
+            ? 'Copy page as Markdown for LLMs'
+            : 'Copy page as HTML for LLMs'
+        }
+        onClick={handleCopyRaw}
+      >
+        {willCopyMarkdown ? (
+          <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
+        ) : (
+          <Translate id='copyPage.copyRawHtml'>Copy Raw HTML</Translate>
+        )}
+      </MenuItem>
+
+      {finalConfig.viewMarkdown && hasMarkdown && (
         <MenuItem
           icon={<MarkdownIcon />}
-          description='Copy page as Markdown for LLMs'
-          onClick={handleCopyRaw}
+          description='View markdown file in new tab'
+          onClick={handleViewMarkdown}
         >
-          <Translate id='copyPage.copyRawMarkdown'>Copy Raw Markdown</Translate>
+          <Translate id='copyPage.viewMarkdown'>View Markdown</Translate>
         </MenuItem>
       )}
 

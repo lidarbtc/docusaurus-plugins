@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { getStructureConfig, getGenerateConfig } from '../config';
+import { getLlmsTxtConfig, getMarkdownConfig } from '../config';
 import {
   ROOT_ROUTE_PATH,
   INDEX_ROUTE_PATH,
@@ -36,17 +36,18 @@ export function buildLlmsTxtContent(
   );
 
   // Get configuration groups
-  const structureConfig = getStructureConfig(config);
-  const generateConfig = getGenerateConfig(config);
+  const llmsTxtConfig = getLlmsTxtConfig(config);
+  const markdownConfig = getMarkdownConfig(config);
 
   // Generate configuration values
   const documentTitle =
-    structureConfig.siteTitle ||
+    llmsTxtConfig.siteTitle ||
     siteConfig.title ||
     rootDoc?.title ||
     DEFAULT_SITE_TITLE;
-  const enableDescriptions = structureConfig.enableDescriptions;
-  const useRelativePaths = generateConfig.relativePaths;
+  const enableDescriptions = llmsTxtConfig.enableDescriptions;
+  const autoSectionDepth = llmsTxtConfig.autoSectionDepth ?? 1;
+  const useRelativePaths = markdownConfig.relativePaths;
   const siteUrl =
     siteConfig.url + (siteConfig.baseUrl !== '/' ? siteConfig.baseUrl : '');
 
@@ -55,7 +56,7 @@ export function buildLlmsTxtContent(
 
   // Add description if enabled and available
   if (enableDescriptions) {
-    const description = structureConfig.siteDescription || rootDoc?.description;
+    const description = llmsTxtConfig.siteDescription || rootDoc?.description;
     if (description) {
       content += `> ${description}\n\n`;
     }
@@ -65,7 +66,7 @@ export function buildLlmsTxtContent(
   if (rootDoc) {
     const formatOptions: Parameters<typeof formatUrl>[1] = {
       relativePaths: useRelativePaths,
-      enableMarkdownFiles: generateConfig.enableMarkdownFiles,
+      enableFiles: markdownConfig.enableFiles,
     };
 
     if (rootDoc.markdownFile) {
@@ -81,22 +82,23 @@ export function buildLlmsTxtContent(
   }
 
   // Add main content (filter out root pages to prevent duplication)
+  // Pass autoSectionDepth to calculate heading levels based on route depth
   content += renderTreeAsMarkdown(
     tree,
-    2,
+    autoSectionDepth,
     true,
     siteUrl,
     useRelativePaths,
-    generateConfig.enableMarkdownFiles,
+    markdownConfig.enableFiles,
     enableDescriptions
   );
 
   // Add ALL optional links to Optional section
   // Optional links should never appear in other categories, regardless of
   // categoryId
-  if (structureConfig.optionalLinks?.length) {
+  if (llmsTxtConfig.optionalLinks?.length) {
     content += `\n## Optional\n`;
-    for (const link of structureConfig.optionalLinks) {
+    for (const link of llmsTxtConfig.optionalLinks) {
       const descPart =
         enableDescriptions && link.description ? `: ${link.description}` : '';
       content += `- [${link.title}](${link.url})${descPart}\n`;
