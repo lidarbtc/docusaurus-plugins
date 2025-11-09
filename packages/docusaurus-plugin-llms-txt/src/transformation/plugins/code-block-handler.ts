@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import type { Element } from 'hast';
+import type { Element, Parents } from 'hast';
+import type { State } from 'hast-util-to-mdast';
 import type { Code } from 'mdast';
 
 /**
@@ -74,12 +75,16 @@ function extractText(node: Element | { type: string; value?: string }): string {
  * 4. Extracts code content from <code> element
  * 5. Returns proper mdast code node with language preserved
  *
- * @param h - Handler context from hast-util-to-mdast
+ * @param state - Handler state from hast-util-to-mdast
  * @param node - The <pre> element from the hast tree
+ * @param parent - The parent element (optional)
  * @returns An mdast code node with language identifier
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function handlePreElement(h: any, node: Element): Code | void {
+export function handlePreElement(
+  state: State,
+  node: Element,
+  parent?: Parents
+): Code | void {
   // Verify this is a pre element
   if (node.tagName !== 'pre') {
     return undefined;
@@ -105,11 +110,8 @@ export function handlePreElement(h: any, node: Element): Code | void {
   let lang = extractLanguage(node.properties?.className);
 
   // If not found on pre, check parent element (Docusaurus wrapper div)
-  if (!lang && h.augment && 'parent' in h && h.parent) {
-    const parent = h.parent as Element | undefined;
-    if (parent && 'properties' in parent) {
-      lang = extractLanguage(parent.properties?.className);
-    }
+  if (!lang && parent && parent.type === 'element') {
+    lang = extractLanguage(parent.properties?.className);
   }
 
   // Extract the code content from the code element
