@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
+import { handlePreElement } from './code-block-handler';
 import rehypeLinks from './rehype-links';
 import rehypeTables from './rehype-tables';
 
@@ -97,7 +98,10 @@ export class PluginRegistry {
 
     // Always last - converts HTML AST to Markdown AST
     processor.use(rehypeRemark, {
-      handlers: { br: () => ({ type: 'html', value: '<br />' }) },
+      handlers: {
+        br: () => ({ type: 'html', value: '<br />' }),
+        pre: handlePreElement,
+      },
     });
   }
 

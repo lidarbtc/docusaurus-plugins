@@ -1,0 +1,520 @@
+---
+sidebar_position: 100
+title: Test MDX Tabs
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Testing Code Blocks in MDX Components
+
+This page tests whether code blocks inside MDX components (Tabs) preserve their language identifiers and formatting.
+
+## Web Languages
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```javascript
+function fetchUserData(userId) {
+  return fetch(`/api/users/${userId}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log('User data:', data);
+      return data;
+    })
+    .catch(error => console.error('Error:', error));
+}
+```
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+async function fetchUserData(userId: number): Promise<User> {
+  const response = await fetch(`/api/users/${userId}`);
+  const data: User = await response.json();
+  return data;
+}
+```
+
+</TabItem>
+<TabItem value="html" label="HTML">
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Test Page</title>
+  </head>
+  <body>
+    <h1>Hello World</h1>
+    <p>This is a test page.</p>
+  </body>
+</html>
+```
+
+</TabItem>
+<TabItem value="css" label="CSS">
+
+```css
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: #f0f0f0;
+}
+
+.container h1 {
+  color: #333;
+  font-size: 2rem;
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Backend Languages
+
+<Tabs>
+<TabItem value="python" label="Python">
+
+```python
+def calculate_fibonacci(n):
+    if n <= 1:
+        return n
+
+    fib = [0, 1]
+    for i in range(2, n + 1):
+        fib.append(fib[i-1] + fib[i-2])
+
+    return fib[n]
+
+result = calculate_fibonacci(10)
+print(f"Fibonacci(10) = {result}")
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java
+public class FibonacciCalculator {
+    public static int calculateFibonacci(int n) {
+        if (n <= 1) {
+            return n;
+        }
+
+        int[] fib = new int[n + 1];
+        fib[0] = 0;
+        fib[1] = 1;
+
+        for (int i = 2; i <= n; i++) {
+            fib[i] = fib[i-1] + fib[i-2];
+        }
+
+        return fib[n];
+    }
+}
+```
+
+</TabItem>
+<TabItem value="go" label="Go">
+
+```go
+package main
+
+import "fmt"
+
+func calculateFibonacci(n int) int {
+    if n <= 1 {
+        return n
+    }
+
+    fib := make([]int, n+1)
+    fib[0] = 0
+    fib[1] = 1
+
+    for i := 2; i <= n; i++ {
+        fib[i] = fib[i-1] + fib[i-2]
+    }
+
+    return fib[n]
+}
+
+func main() {
+    fmt.Printf("Fibonacci(10) = %d\n", calculateFibonacci(10))
+}
+```
+
+</TabItem>
+<TabItem value="rust" label="Rust">
+
+```rust
+fn calculate_fibonacci(n: usize) -> u64 {
+    if n <= 1 {
+        return n as u64;
+    }
+
+    let mut fib = vec![0u64; n + 1];
+    fib[0] = 0;
+    fib[1] = 1;
+
+    for i in 2..=n {
+        fib[i] = fib[i-1] + fib[i-2];
+    }
+
+    fib[n]
+}
+
+fn main() {
+    println!("Fibonacci(10) = {}", calculate_fibonacci(10));
+}
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php
+<?php
+function calculateFibonacci($n) {
+    if ($n <= 1) {
+        return $n;
+    }
+
+    $fib = array(0, 1);
+    for ($i = 2; $i <= $n; $i++) {
+        $fib[$i] = $fib[$i-1] + $fib[$i-2];
+    }
+
+    return $fib[$n];
+}
+
+$result = calculateFibonacci(10);
+echo "Fibonacci(10) = $result\n";
+?>
+```
+
+</TabItem>
+</Tabs>
+
+## Shell and Configuration
+
+<Tabs>
+<TabItem value="bash" label="Bash">
+
+```bash
+#!/bin/bash
+
+# Function to calculate factorial
+factorial() {
+  local n=$1
+  if [ $n -le 1 ]; then
+    echo 1
+  else
+    local prev=$(factorial $((n-1)))
+    echo $((n * prev))
+  fi
+}
+
+result=$(factorial 5)
+echo "Factorial of 5 is: $result"
+```
+
+</TabItem>
+<TabItem value="shell" label="Shell">
+
+```shell
+#!/bin/sh
+
+# Deploy script
+echo "Starting deployment..."
+
+npm install
+npm run build
+npm run test
+
+if [ $? -eq 0 ]; then
+  echo "Build successful, deploying..."
+  rsync -avz build/ user@server:/var/www/
+else
+  echo "Build failed, aborting deployment"
+  exit 1
+fi
+```
+
+</TabItem>
+<TabItem value="yaml" label="YAML">
+
+```yaml
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: npm test
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+```json
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest",
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "react": "^18.2.0"
+  }
+}
+```
+
+</TabItem>
+<TabItem value="toml" label="TOML">
+
+```toml
+[package]
+name = "my-app"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+
+[dev-dependencies]
+criterion = "0.5"
+```
+
+</TabItem>
+</Tabs>
+
+## Data and Query Languages
+
+<Tabs>
+<TabItem value="sql" label="SQL">
+
+```sql
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  COUNT(o.id) as order_count,
+  SUM(o.total) as total_spent
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.created_at > '2024-01-01'
+GROUP BY u.id, u.name, u.email
+HAVING COUNT(o.id) > 5
+ORDER BY total_spent DESC
+LIMIT 10;
+```
+
+</TabItem>
+<TabItem value="graphql" label="GraphQL">
+
+```graphql
+query GetUserWithOrders($userId: ID!) {
+  user(id: $userId) {
+    id
+    name
+    email
+    orders(first: 10, orderBy: CREATED_AT_DESC) {
+      edges {
+        node {
+          id
+          total
+          createdAt
+          items {
+            productName
+            quantity
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Mobile Languages
+
+<Tabs>
+<TabItem value="swift" label="Swift">
+
+```swift
+struct ContentView: View {
+    @State private var count = 0
+
+    var body: some View {
+        VStack {
+            Text("Count: \(count)")
+                .font(.largeTitle)
+                .padding()
+
+            Button(action: {
+                count += 1
+            }) {
+                Text("Increment")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+<TabItem value="kotlin" label="Kotlin">
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private var count = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val button = findViewById<Button>(R.id.incrementButton)
+        val textView = findViewById<TextView>(R.id.countText)
+
+        button.setOnClickListener {
+            count++
+            textView.text = "Count: $count"
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Other Languages
+
+<Tabs>
+<TabItem value="ruby" label="Ruby">
+
+```ruby
+class FibonacciCalculator
+  def self.calculate(n)
+    return n if n <= 1
+
+    fib = [0, 1]
+    (2..n).each do |i|
+      fib[i] = fib[i-1] + fib[i-2]
+    end
+
+    fib[n]
+  end
+end
+
+result = FibonacciCalculator.calculate(10)
+puts "Fibonacci(10) = #{result}"
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp
+#include <iostream>
+#include <vector>
+
+int calculateFibonacci(int n) {
+    if (n <= 1) {
+        return n;
+    }
+
+    std::vector<int> fib(n + 1);
+    fib[0] = 0;
+    fib[1] = 1;
+
+    for (int i = 2; i <= n; i++) {
+        fib[i] = fib[i-1] + fib[i-2];
+    }
+
+    return fib[n];
+}
+
+int main() {
+    std::cout << "Fibonacci(10) = " << calculateFibonacci(10) << std::endl;
+    return 0;
+}
+```
+
+</TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp
+using System;
+
+public class FibonacciCalculator
+{
+    public static int Calculate(int n)
+    {
+        if (n <= 1)
+        {
+            return n;
+        }
+
+        int[] fib = new int[n + 1];
+        fib[0] = 0;
+        fib[1] = 1;
+
+        for (int i = 2; i <= n; i++)
+        {
+            fib[i] = fib[i-1] + fib[i-2];
+        }
+
+        return fib[n];
+    }
+
+    public static void Main()
+    {
+        Console.WriteLine($"Fibonacci(10) = {Calculate(10)}");
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Test Summary
+
+This page includes code blocks in Tabs for the following languages:
+
+**Web:** JavaScript, TypeScript, HTML, CSS
+**Backend:** Python, Java, Go, Rust, PHP
+**Shell/Config:** Bash, Shell, YAML, JSON, TOML
+**Data:** SQL, GraphQL
+**Mobile:** Swift, Kotlin
+**Other:** Ruby, C++, C#
+
+All code blocks should preserve their language identifiers and formatting in the generated llms.txt files.
