@@ -1,5 +1,12 @@
 # website
 
+## 0.0.1
+
+### Patch Changes
+
+- Updated dependencies [dfedf00]
+  - @signalwire/docusaurus-plugin-llms-txt@2.0.0
+
 ## 0.0.1-alpha.1
 
 ### Patch Changes
